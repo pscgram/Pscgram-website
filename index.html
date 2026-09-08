@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>PSCGram — Kerala PSC Premium Preparation</title>
+  <meta name="description" content="PSCGram premium Kerala PSC study materials and online mock exams.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="index.html"><span class="brand-mark">P</span><span>PSC<span>Gram</span></span></a>
+  <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false">☰</button>
+  <nav id="site-nav">
+    <a href="#materials">PDF Materials</a>
+    <a href="#online-exams">Online Exams</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="contact.html">Contact</a>
+    <a href="admin.html" class="admin-link">Admin</a>
+  </nav>
+</header>
+
+<main>
+  <section class="hero premium-hero">
+    <div class="hero-copy">
+      <div class="eyebrow">KERALA PSC • PREMIUM LEARNING PLATFORM</div>
+      <h1>Your PSC preparation.<br><em>One place.</em></h1>
+      <p>Premium revision PDFs, current affairs and timed online mock exams — built for serious Kerala PSC preparation.</p>
+      <div class="hero-actions">
+        <a class="btn primary" href="#materials">Explore PDFs</a>
+        <a class="btn light" href="#online-exams">Take an Online Exam</a>
+      </div>
+      <div class="trust-row"><span>✓ Exam focused</span><span>✓ Mobile friendly</span><span>✓ Secure payments</span></div>
+    </div>
+    <div class="hero-showcase">
+      <div class="hero-glow"></div>
+      <div class="hero-card">
+        <div class="hero-card-top"><span>PSCGRAM</span><span>PREMIUM</span></div>
+        <div><div class="hero-card-kicker">KERALA PSC</div><div class="hero-card-title">CURRENT<br>AFFAIRS</div></div>
+        <div class="hero-card-bottom"><span>REVISION EDITION</span><span>2026</span></div>
+      </div>
+      <div class="floating-card fc-one"><b>PDF</b><span>Premium Notes</span></div>
+      <div class="floating-card fc-two"><b>EXAM</b><span>Timed Mock Tests</span></div>
+    </div>
+  </section>
+
+  <section class="quick-strip">
+    <div><b>Premium PDFs</b><span>Download after secure payment</span></div>
+    <div><b>Free + Paid Exams</b><span>Practice with instant scoring</span></div>
+    <div><b>PSC Focused</b><span>LGS • LDC • Degree • SI • CPO</span></div>
+  </section>
+
+  <section id="materials" class="section">
+    <div class="section-head">
+      <div><div class="eyebrow">DIGITAL STORE</div><h2>Premium Study Materials</h2><p class="section-sub">Choose a PDF, pay securely and receive your temporary download link.</p></div>
+      <div id="status" class="muted">Loading…</div>
+    </div>
+    <div id="products" class="grid"></div>
+    <div id="empty" class="empty hidden">No materials published yet.</div>
+  </section>
+
+  <section id="online-exams" class="section exam-store-section">
+    <div class="section-head">
+      <div><div class="eyebrow">PRACTICE ARENA</div><h2>Online Mock Exams</h2><p class="section-sub">Start a free test or unlock a paid PSC mock exam with Razorpay.</p></div>
+      <a class="btn ghost" href="exam.html">Open Exam Centre →</a>
+    </div>
+    <div id="home-exams" class="exam-store-grid"><div class="loading-card">Loading online exams…</div></div>
+  </section>
+
+  <section class="feature-section">
+    <div class="feature-intro"><div class="eyebrow">WHY PSCGRAM</div><h2>Designed around how PSC aspirants actually study.</h2><p>Everything is organised into a simple flow: discover → purchase → revise → test.</p></div>
+    <div class="feature-grid">
+      <article><span>01</span><h3>Premium PDFs</h3><p>Clean, revision-friendly study materials with exam-focused presentation.</p></article>
+      <article><span>02</span><h3>Paid Online Exams</h3><p>Razorpay-protected mock exams with timed questions and server-side scoring.</p></article>
+      <article><span>03</span><h3>Admin Control</h3><p>Publish PDFs, create exams, add questions and manage your catalogue from one dashboard.</p></article>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div>© <span id="year"></span> PSCGram</div>
+  <div class="footer-links">
+    <a href="terms.html">Terms &amp; Conditions</a><a href="privacy.html">Privacy Policy</a><a href="refund.html">Cancellation &amp; Refund</a><a href="pricing.html">Pricing</a><a href="contact.html">Contact Us</a><a href="admin.html">Admin Login</a>
+  </div>
+</footer>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script><script src="ui.js"></script><script src="app.js"></script>
+</body>
+</html>

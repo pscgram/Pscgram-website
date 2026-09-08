@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PSCGram Online Exam</title><link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar"><a class="brand" href="index.html"><span class="brand-mark">P</span><span>PSC<span>Gram</span></span></a><button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false">☰</button><nav id="site-nav" class="top-actions"><a href="index.html">← Home</a></nav></header>
+<main class="admin-wrap">
+<section id="exam-list-panel" class="panel">
+<div class="eyebrow">PSCGRAM TEST SERIES</div><h1>Online Exams</h1><p class="muted">Choose a published mock test. Free and paid tests are supported.</p>
+<div id="exam-list">Loading…</div>
+</section>
+<section id="start-panel" class="panel hidden">
+<div class="eyebrow">START EXAM</div><h1 id="start-title"></h1><p id="start-description" class="muted"></p>
+<p><b>Duration:</b> <span id="start-duration"></span> minutes &nbsp; • &nbsp; <b>Questions:</b> <span id="start-count"></span></p>
+<div id="payment-note" class="status"></div><form id="start-form"><label>Your name<input id="student-name" required></label><label>Email <span class="muted">(optional)</span><input id="student-email" type="email"></label><button class="btn primary" type="submit">Start Exam</button></form>
+</section>
+<section id="exam-panel" class="hidden">
+<div class="dash-head"><div><div class="eyebrow">ONLINE EXAM</div><h1 id="live-title"></h1></div><div class="timer" id="timer">00:00</div></div>
+<div class="panel"><div id="question-number" class="eyebrow"></div><h2 id="question-text"></h2><div id="options" class="exam-options"></div><div class="exam-nav"><button id="prev" class="btn ghost">Previous</button><button id="next" class="btn primary">Next</button><button id="submit" class="btn primary hidden">Submit Exam</button></div></div>
+<div class="panel"><div class="eyebrow">QUESTION NAVIGATION</div><div id="palette" class="question-palette"></div></div>
+</section>
+<section id="result-panel" class="panel hidden"><div class="eyebrow">RESULT</div><h1 id="result-title"></h1><div id="result-summary"></div><a class="btn primary" href="exam.html">Back to Exams</a></section>
+</main>
+<footer class="site-footer">
+  <div>© <span id="year"></span> PSCGram</div>
+  <div class="footer-links"><a href="terms.html">Terms &amp; Conditions</a><a href="privacy.html">Privacy Policy</a><a href="refund.html">Cancellation &amp; Refund</a><a href="pricing.html">Pricing</a><a href="contact.html">Contact Us</a></div>
+</footer>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="ui.js"></script><script src="exam.js"></script>
+<script>document.getElementById("year").textContent=new Date().getFullYear();</script>
+</body></html>

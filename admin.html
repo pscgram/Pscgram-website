@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>PSCGram Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="admin-body">
+<header class="topbar">
+  <a class="brand" href="index.html"><span class="brand-mark">P</span><span>PSC<span>Gram</span></span></a>
+  <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false">☰</button>
+  <nav id="site-nav" class="top-actions"><a href="index.html">← Website</a></nav>
+</header>
+
+<main class="admin-wrap">
+  <section id="login-panel" class="panel auth-panel">
+    <div class="eyebrow">PRIVATE AREA</div>
+    <h1>Admin Login</h1>
+    <p class="muted">Use the Supabase admin email and password you created.</p>
+    <form id="login-form">
+      <label>Email<input id="email" type="email" required autocomplete="email"></label>
+      <label>Password<input id="password" type="password" required autocomplete="current-password"></label>
+      <button class="btn primary" type="submit">Sign in</button>
+      <div id="login-error" class="error"></div>
+    </form>
+  </section>
+
+  <section id="dashboard" class="hidden">
+    <div class="dash-head">
+      <div><div class="eyebrow">PSCGRAM CONTROL CENTER</div><h1>Admin Dashboard</h1></div>
+      <button id="logout" class="btn ghost">Sign out</button>
+    </div>
+
+    <div class="panel">
+      <div class="section-head"><div><h2>Upload a PDF</h2><p class="muted">Add a product to the public website.</p></div></div>
+      <form id="upload-form" class="form-grid">
+        <label>Title<input id="title" required placeholder="CURRENT AFFAIRS 2025"></label>
+        <label>Price (₹)<input id="price" type="number" min="0" step="1" value="99" required></label>
+        <label class="full">Description<textarea id="description" rows="3" placeholder="Complete edition, exam focused..."></textarea></label>
+        <label>Cover image URL <span class="muted">(optional)</span><input id="cover" placeholder="https://..."></label>
+        <label>PDF file<input id="pdf" type="file" accept="application/pdf" required></label>
+        <button class="btn primary full" type="submit">Upload & Publish</button>
+        <div id="upload-status" class="status full"></div>
+      </form>
+    </div>
+
+    <div class="panel">
+      <div class="section-head"><div><h2>Online Exams</h2><p class="muted">Create PSC-style mock tests and add questions.</p></div></div>
+      <form id="exam-form" class="form-grid">
+        <label>Exam title<input id="exam-title" required placeholder="CURRENT AFFAIRS MOCK TEST 1"></label>
+        <label>Duration (minutes)<input id="exam-duration" type="number" min="1" value="30" required></label>
+        <label>Negative mark per wrong answer<input id="exam-negative" type="number" min="0" step="0.01" value="0"></label>
+        <label>Exam type<select id="exam-paid"><option value="false">Free</option><option value="true">Paid</option></select></label>
+        <label>Price (₹)<input id="exam-price" type="number" min="1" step="1" value="29" disabled></label>
+        <label class="full">Description<textarea id="exam-description" rows="2" placeholder="50 questions • PSC focused"></textarea></label>
+        <button class="btn primary" type="submit">Create Exam</button>
+        <div id="exam-status" class="status full"></div>
+      </form>
+      <div id="admin-exams" class="admin-list"></div>
+    </div>
+
+    <div class="panel hidden" id="question-panel">
+      <div class="section-head"><div><h2 id="question-panel-title">Add Questions</h2><p class="muted">Add four options and choose the correct answer.</p></div></div>
+      <form id="question-form" class="form-grid">
+        <label class="full">Question<textarea id="q-text" rows="3" required placeholder="Question text"></textarea></label>
+        <label>Option A<input id="q-a" required></label>
+        <label>Option B<input id="q-b" required></label>
+        <label>Option C<input id="q-c" required></label>
+        <label>Option D<input id="q-d" required></label>
+        <label>Correct option<select id="q-correct"><option>A</option><option>B</option><option>C</option><option>D</option></select></label>
+        <label>Marks<input id="q-marks" type="number" min="0" step="0.5" value="1"></label>
+        <button class="btn primary full" type="submit">Add Question</button>
+        <div id="question-status" class="status full"></div>
+      </form>
+      <div id="admin-questions" class="admin-list"></div>
+    </div>
+
+    <div class="panel">
+      <div class="section-head"><div><h2>Published Materials</h2></div><button id="refresh" class="btn ghost">Refresh</button></div>
+      <div id="admin-products" class="admin-list"></div>
+    </div>
+  </section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="admin.js"></script>
+</body>
+<script src="ui.js"></script>
+</html>
