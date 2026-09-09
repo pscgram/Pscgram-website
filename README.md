@@ -57,3 +57,7 @@ The Admin dashboard now supports **Edit** and **Delete** for published current a
 
 ## Premium Membership v6
 One-time ₹999 payment gives 1 year of Premium Membership. Run `premium_membership.sql` in Supabase SQL Editor, then deploy `supabase/functions/premium-membership/index.ts` as the `premium-membership` Edge Function with Verify JWT OFF. It uses the existing `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` server secrets.
+
+
+### v7 fix
+Free exams no longer require a paid exam access token. The `paid-exam` Edge Function now allows `start` and `submit` for published free exams while keeping token verification for paid exams.
