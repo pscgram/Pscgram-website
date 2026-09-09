@@ -254,16 +254,29 @@ if (paidSelect && paidPrice) paidSelect.addEventListener("change", () => {
 const caForm = document.getElementById("ca-form");
 const caAdminStatus = document.getElementById("ca-status-admin");
 const caList = document.getElementById("admin-ca-list");
-if (caForm) {
+let editingCaId = null;
+
+function resetCaForm() {
+  editingCaId = null;
+  caForm.reset();
   document.getElementById("ca-date").value = new Date().toISOString().slice(0,10);
+  document.getElementById("ca-sort").value = 1;
+  const submit = caForm.querySelector('button[type="submit"]');
+  if (submit) submit.textContent = "Publish Current Affair";
+  const cancel = document.getElementById("ca-cancel-edit");
+  if (cancel) cancel.classList.add("hidden");
+}
+
+if (caForm) {
+  resetCaForm();
 
   caForm.addEventListener("submit", async e => {
     e.preventDefault();
-    caAdminStatus.textContent = "Publishing…";
+    caAdminStatus.textContent = editingCaId ? "Updating & republishing…" : "Publishing…";
     const { data: { user } } = await db.auth.getUser();
     if (!user || user.id !== ADMIN_UID) { caAdminStatus.textContent = "Admin authorization required."; return; }
 
-    const points = document.getElementById("ca-points").value.split("\n").map(x=>x.trim()).filter(Boolean).slice(0,6);
+    const points = document.getElementById("ca-points").value.split("\\n").map(x=>x.trim()).filter(Boolean).slice(0,6);
     const payload = {
       category: document.getElementById("ca-category").value,
       published_date: document.getElementById("ca-date").value,
@@ -274,15 +287,48 @@ if (caForm) {
       is_published: true,
       created_by: user.id
     };
-    const { error } = await db.from("current_affairs").insert(payload);
+
+    let error;
+    if (editingCaId) {
+      ({ error } = await db.from("current_affairs").update(payload).eq("id", editingCaId));
+    } else {
+      ({ error } = await db.from("current_affairs").insert(payload));
+    }
+
     if (error) { caAdminStatus.textContent = error.message; return; }
-    caAdminStatus.textContent = "Published successfully!";
-    caForm.reset();
-    document.getElementById("ca-date").value = new Date().toISOString().slice(0,10);
-    document.getElementById("ca-sort").value = 1;
+    caAdminStatus.textContent = editingCaId ? "Updated and republished successfully!" : "Published successfully!";
+    resetCaForm();
     loadAdminCurrentAffairs();
   });
+
+  const cancel = document.getElementById("ca-cancel-edit");
+  if (cancel) cancel.addEventListener("click", () => {
+    resetCaForm();
+    caAdminStatus.textContent = "Edit cancelled.";
+  });
 }
+
+async function editCurrentAffair(id) {
+  const { data, error } = await db.from("current_affairs").select("*").eq("id", id).single();
+  if (error) { alert(error.message); return; }
+
+  editingCaId = id;
+  document.getElementById("ca-category").value = data.category || "National";
+  document.getElementById("ca-date").value = data.published_date || new Date().toISOString().slice(0,10);
+  document.getElementById("ca-title").value = data.title || "";
+  document.getElementById("ca-note").value = data.note || "";
+  const points = Array.isArray(data.points) ? data.points : [];
+  document.getElementById("ca-points").value = points.join("\\n");
+  document.getElementById("ca-sort").value = data.sort_order || 1;
+
+  const submit = caForm.querySelector('button[type="submit"]');
+  if (submit) submit.textContent = "Update & Republish";
+  const cancel = document.getElementById("ca-cancel-edit");
+  if (cancel) cancel.classList.remove("hidden");
+  caAdminStatus.textContent = "Editing this entry…";
+  caForm.scrollIntoView({behavior:"smooth", block:"start"});
+}
+
 async function loadAdminCurrentAffairs(){
   if(!caList) return;
   caList.innerHTML="Loading…";
@@ -292,12 +338,20 @@ async function loadAdminCurrentAffairs(){
   caList.innerHTML=data.map(x=>`
     <div class="admin-item">
       <div><b>${esc(x.title)}</b><small>${esc(x.category)} • ${esc(x.published_date)} • ${x.is_published?"Published":"Hidden"}</small></div>
-      <button class="delete-btn ca-delete" data-id="${x.id}">Delete</button>
+      <div class="admin-actions">
+        <button class="btn ghost ca-edit" data-id="${x.id}">Edit</button>
+        <button class="delete-btn ca-delete" data-id="${x.id}">Delete</button>
+      </div>
     </div>`).join("");
+
+  caList.querySelectorAll(".ca-edit").forEach(btn=>btn.addEventListener("click",()=>editCurrentAffair(btn.dataset.id)));
   caList.querySelectorAll(".ca-delete").forEach(btn=>btn.addEventListener("click",async()=>{
-    if(!confirm("Delete this current-affairs entry?")) return;
+    if(!confirm("Delete this current-affairs entry? This will remove it from the website.")) return;
     const {error}=await db.from("current_affairs").delete().eq("id",btn.dataset.id);
-    if(error) alert(error.message); else loadAdminCurrentAffairs();
+    if(error) alert(error.message); else {
+      if (editingCaId === btn.dataset.id) resetCaForm();
+      loadAdminCurrentAffairs();
+    }
   }));
 }
 const oldShowSession=showSession;

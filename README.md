@@ -49,3 +49,7 @@ The Current Affairs page includes safe preview cards if the new table has no ent
 
 ### PSC preparation levels
 Added dedicated Home sections for **10th Level**, **12th Level**, and **Degree Level** with mobile-friendly cards and links into the exam centre.
+
+
+## Daily Current Affairs admin
+The Admin dashboard now supports **Edit** and **Delete** for published current affairs. Editing loads the existing entry and **Update & Republish** saves the corrected version. Delete is available only to the admin dashboard.
