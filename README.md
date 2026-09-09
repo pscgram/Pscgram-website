@@ -53,3 +53,7 @@ Added dedicated Home sections for **10th Level**, **12th Level**, and **Degree L
 
 ## Daily Current Affairs admin
 The Admin dashboard now supports **Edit** and **Delete** for published current affairs. Editing loads the existing entry and **Update & Republish** saves the corrected version. Delete is available only to the admin dashboard.
+
+
+## Premium Membership v6
+One-time ₹999 payment gives 1 year of Premium Membership. Run `premium_membership.sql` in Supabase SQL Editor, then deploy `supabase/functions/premium-membership/index.ts` as the `premium-membership` Edge Function with Verify JWT OFF. It uses the existing `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` server secrets.

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Premium Member | PSCGram</title><link rel="stylesheet" href="style.css">
+<style>
+.pm-wrap{max-width:1100px;margin:0 auto;padding:30px 18px 70px}.pm-hero{border-radius:28px;padding:30px 22px;background:linear-gradient(135deg,#10174d,#155eef);color:#fff}.pm-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:20px}.pm-card{background:#fff;border:1px solid #e5e7eb;border-radius:22px;padding:22px}.pm-card h3{margin-top:0}@media(max-width:700px){.pm-grid{grid-template-columns:1fr}}
+</style></head>
+<body>
+<header class="topbar"><a class="brand" href="index.html"><span class="brand-mark">P</span><span>PSC<span>Gram</span></span></a><button class="menu-toggle" type="button" aria-label="Open menu">☰</button><nav id="site-nav"><a href="index.html">Home</a><a href="current-affairs.html">Current Affairs</a><a href="exam.html">Exams</a><a href="member.html">Member Area</a></nav></header>
+<main class="pm-wrap">
+<section class="pm-hero"><div class="eyebrow">⭐ PSCGRAM PREMIUM</div><h1>Welcome, Premium Member</h1><p id="pmStatus">Checking your membership…</p></section>
+<div id="pmContent" class="hidden">
+<section class="pm-grid">
+<div class="pm-card"><h3>📚 Premium PDFs</h3><p>Access premium study materials and exam-focused PDF collections.</p><a class="btn primary" href="index.html#materials">Open PDF Store →</a></div>
+<div class="pm-card"><h3>📝 Premium Mock Exams</h3><p>Premium test series and paid exam content available to active members.</p><a class="btn primary" href="exam.html">Open Exams →</a></div>
+<div class="pm-card"><h3>📰 Premium Current Affairs</h3><p>Premium current-affairs content and revision material.</p><a class="btn primary" href="current-affairs.html">Open Current Affairs →</a></div>
+<div class="pm-card"><h3>🎯 All Exam Levels</h3><p>Premium preparation for 10th, 12th and Degree-level categories.</p><a class="btn primary" href="index.html#psc-levels">Explore Levels →</a></div>
+</section>
+</div>
+<div id="pmDenied" class="pm-card" style="margin-top:20px"><h3>Premium access required</h3><p>Your account does not currently have an active Premium Membership.</p><a class="btn premium-join" href="pricing.html">Join Premium — ₹999/year</a></div>
+</main>
+<footer class="site-footer"><div>© <span id="year"></span> PSCGram</div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="ui.js"></script><script src="premium-member.js"></script>
+</body></html>

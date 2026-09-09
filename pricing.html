@@ -1,63 +1,59 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Pricing | PSCGram</title>
-  <meta name="description" content="Current PSCGram digital study-material pricing and purchase information.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Premium Membership | PSCGram</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.membership-wrap{max-width:1050px;margin:0 auto;padding:28px 18px 70px}
+.membership-hero{background:linear-gradient(135deg,#0b1740,#155eef);color:#fff;border-radius:28px;padding:34px 24px;margin-bottom:22px;box-shadow:0 18px 50px rgba(21,94,239,.18)}
+.membership-hero h1{font-size:clamp(34px,7vw,58px);margin:8px 0 12px}.membership-hero p{font-size:18px;line-height:1.6;max-width:700px;opacity:.92}
+.plan-card{background:#fff;border:1px solid #e5e7eb;border-radius:26px;padding:25px;box-shadow:0 12px 35px rgba(15,23,42,.07)}
+.plan-price{font-size:52px;font-weight:800;margin:10px 0}.plan-price small{font-size:17px;font-weight:600;color:#64748b}
+.benefits{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:20px 0}.benefits div{padding:12px 14px;border-radius:14px;background:#f6f8ff}
+.premium-action{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}.premium-action .btn{min-width:190px}
+.premium-state{margin:14px 0;padding:13px 15px;border-radius:14px;background:#f1f5f9;font-weight:700}
+@media(max-width:650px){.benefits{grid-template-columns:1fr}.membership-hero{padding:27px 20px}}
+</style>
 </head>
 <body>
 <header class="topbar">
-  <a class="brand" href="index.html"><span class="brand-mark">P</span><span>PSC<span>Gram</span></span></a>
-  <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false">☰</button>
-  <nav id="site-nav">
-    <a href="index.html#materials">Materials</a>
-    <a href="exam.html">Online Exam</a>
-    <a href="pricing.html">Pricing</a>
-    <a href="contact.html">Contact</a>
-    <a href="index.html#about">About</a>
-  </nav>
+<a class="brand" href="index.html"><span class="brand-mark">P</span><span>PSC<span>Gram</span></span></a>
+<button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false">☰</button>
+<nav id="site-nav"><a href="index.html">Home</a><a href="exam.html">Exams</a><a href="current-affairs.html">Current Affairs</a><a href="login.html">Member Login</a></nav>
 </header>
-<main class="legal-main">
-  <section class="legal-hero">
-    <div class="eyebrow">PSCGRAM • INFORMATION</div>
-    <h1>Pricing</h1>
-    <p>Current PSCGram digital study-material pricing and purchase information.</p>
-  </section>
-  <section class="legal-content">
-    
-<div class="price-highlight"><div><div class="eyebrow">DIGITAL STUDY MATERIAL</div><h2>Premium PSC PDFs</h2><p>Prices are displayed on the product cards on the PSCGram home page before checkout.</p></div><div class="price-big">From ₹99</div></div>
-<h2>Current pricing</h2>
-<div class="pricing-table">
-  <div><strong>Current Affairs / Study PDF</strong><span>Starting from ₹99</span></div>
-  <div><strong>Online Exam</strong><span>Price, if applicable, is displayed before starting a paid exam.</span></div>
+<main class="membership-wrap">
+<section class="membership-hero">
+<div class="eyebrow">PSCGRAM PREMIUM MEMBERSHIP</div>
+<h1>One payment. One full year. All premium contents.</h1>
+<p>Get complete access to PSCGram Premium for <strong>₹999 / year</strong>. No separate payment for premium PDFs, premium mock exams, premium current affairs or new premium content released during your membership year.</p>
+</section>
+<section class="plan-card">
+<div class="eyebrow">1 YEAR COMPLETE ACCESS</div>
+<h2>Premium Membership</h2>
+<div class="plan-price">₹999 <small>/ year</small></div>
+<div id="premiumState" class="premium-state">Checking membership…</div>
+<div class="benefits">
+<div>✓ All Premium PDFs</div><div>✓ All Premium Mock Exams & Test Series</div>
+<div>✓ Premium Current Affairs</div><div>✓ 10th, 12th & Degree Premium Content</div>
+<div>✓ Detailed Results & Performance Analysis</div><div>✓ All Premium Study Bundles</div>
+<div>✓ New Premium Content during membership year</div><div>✓ No separate premium-content payments</div>
 </div>
-<p class="muted">The final price for each product is shown on the product listing and at Razorpay checkout. Prices may change for new or updated editions.</p>
-<h2>What you receive</h2>
-<ul><li>Digital PDF study material or the selected online exam service.</li><li>Secure electronic delivery after successful payment verification for eligible PDF products.</li><li>Customer support at <a class="text-link" href="mailto:pscgramonline@gmail.com">pscgramonline@gmail.com</a>.</li></ul>
-<h2>Payment methods</h2>
-<p>Payments are processed securely through Razorpay and may support available methods such as UPI, cards and net banking, subject to Razorpay/account availability.</p>
-<h2>Refunds</h2>
-<p>Please review our <a class="text-link" href="refund.html">Cancellation &amp; Refund Policy</a> before purchasing.</p>
-
-  </section>
+<div id="premiumActiveBox" class="hidden">
+<p><strong>Your Premium Membership is active.</strong> Open the Premium Member area to access protected premium sections.</p>
+<a class="btn premium-join" href="premium-member.html">Open Premium Member Area →</a>
+</div>
+<div class="premium-action">
+<button id="joinPremium" class="btn premium-join">Join Premium — ₹999</button>
+<a id="loginPremium" class="btn light hidden" href="login.html?redirect=pricing.html">Login to Continue</a>
+</div>
+<div id="premiumMessage" class="auth-message"></div>
+</section>
 </main>
-<footer class="site-footer">
-  <div>© <span id="year"></span> PSCGram</div>
-  <div class="footer-links">
-    <a href="terms.html">Terms &amp; Conditions</a>
-    <a href="privacy.html">Privacy Policy</a>
-    <a href="refund.html">Cancellation &amp; Refund</a>
-    <a href="pricing.html">Pricing</a>
-    <a href="contact.html">Contact Us</a>
-    <a href="admin.html">Admin Login</a>
-  </div>
-</footer>
-<script src="ui.js"></script>
-<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+<footer class="site-footer"><div>© <span id="year"></span> PSCGram</div><div class="footer-links"><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="refund.html">Refund</a><a href="contact.html">Contact</a></div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script><script src="ui.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="premium.js"></script>
 </body>
 </html>

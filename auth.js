@@ -18,7 +18,7 @@ $('loginForm')?.addEventListener('submit', async e=>{
   const {data,error}=await db.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});
   if(error){showMessage(error.message);return;}
   showMessage('Login successful. Opening your member area…',true);
-  setTimeout(()=>location.href='member.html',350);
+  setTimeout(()=>location.href=(new URLSearchParams(location.search).get('redirect')||'member.html'),350);
 });
 
 $('signupForm')?.addEventListener('submit', async e=>{
@@ -27,7 +27,7 @@ $('signupForm')?.addEventListener('submit', async e=>{
   showMessage('Creating your account…');
   const {data,error}=await db.auth.signUp({email:$('signupEmail').value.trim(),password:$('signupPassword').value});
   if(error){showMessage(error.message);return;}
-  if(data.session){showMessage('Account created. Opening your member area…',true);setTimeout(()=>location.href='member.html',350);}
+  if(data.session){showMessage('Account created. Opening your member area…',true);setTimeout(()=>location.href=(new URLSearchParams(location.search).get('redirect')||'member.html'),350);}
   else showMessage('Account created. Please check your email to confirm your account, then log in.',true);
 });
 
@@ -36,7 +36,7 @@ $('signupForm')?.addEventListener('submit', async e=>{
   if(session && location.pathname.endsWith('/login.html')){
     // Keep the login page available, but offer the signed-in member area.
     showMessage('You are already signed in. Opening your member area…',true);
-    setTimeout(()=>location.href='member.html',500);
+    setTimeout(()=>location.href=(new URLSearchParams(location.search).get('redirect')||'member.html'),500);
   }
   const params=new URLSearchParams(location.search); if(params.get('mode')==='signup')setMode('signup');
 })();
