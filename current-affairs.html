@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1456d8">
+<title>Daily Current Affairs | PSCGram</title>
+<meta name="description" content="Daily PSC-focused current affairs with short notes and quick facts.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="premium-page">
+<header class="topbar app-topbar">
+  <a class="brand" href="index.html"><span class="brand-mark">P</span><span>PSC<span>Gram</span></span></a>
+  <div class="topbar-actions"><a class="top-pill" href="exam.html">Daily Quiz</a><button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false">☰</button></div>
+  <nav id="site-nav">
+    <a href="index.html">Home</a><a href="current-affairs.html" class="active">Current Affairs</a><a href="exam.html">Online Exams</a>
+    <a href="index.html#materials">PDF Store</a><a href="pricing.html">Premium</a><a href="contact.html">Contact</a>
+  </nav>
+</header>
+
+<main>
+<section class="ca-hero">
+  <div>
+    <div class="eyebrow">PSCGRAM • DAILY UPDATE</div>
+    <h1>Daily Current Affairs</h1>
+    <p>Short, exam-oriented notes for Kerala PSC aspirants. Read less, remember more.</p>
+    <div class="ca-date-row">
+      <button class="date-chip active" data-range="today">Today</button>
+      <button class="date-chip" data-range="yesterday">Yesterday</button>
+      <button class="date-chip" data-range="previous">Previous</button>
+    </div>
+  </div>
+  <div class="ca-hero-card"><span>PSC QUICK REVISION</span><b>10 min</b><small>Daily current affairs</small></div>
+</section>
+
+<section class="section app-section">
+  <div class="section-head compact-head">
+    <div><div class="eyebrow">09 SEPTEMBER 2026</div><h2>Today's Important Updates</h2><p class="section-sub">National • Kerala • International • Science • Sports</p></div>
+    <div id="ca-status" class="muted">Loading…</div>
+  </div>
+  <div class="ca-filter-row">
+    <button class="ca-filter active" data-cat="All">All</button>
+    <button class="ca-filter" data-cat="National">National</button>
+    <button class="ca-filter" data-cat="Kerala">Kerala</button>
+    <button class="ca-filter" data-cat="International">International</button>
+    <button class="ca-filter" data-cat="Science & Tech">Science & Tech</button>
+    <button class="ca-filter" data-cat="Sports">Sports</button>
+  </div>
+  <div id="ca-list" class="ca-list"></div>
+</section>
+
+<section class="section app-section">
+  <div class="psc-fact-card">
+    <div class="psc-fact-icon">★</div>
+    <div><span class="tag">PSC QUICK FACT</span><h3>Turn every news item into one exam-ready fact.</h3><p>Use the short note, then revise the highlighted key points before your next mock test.</p></div>
+  </div>
+</section>
+
+<section class="category-strip">
+  <div><span>PSCGRAM PREMIUM</span><h2>Need the complete monthly revision?</h2><p>Get curated current affairs PDFs and premium mock tests in one place.</p></div>
+  <a class="btn dark-btn" href="pricing.html">View Premium →</a>
+</section>
+</main>
+
+<footer class="site-footer">
+  <div>© <span id="year"></span> PSCGram</div>
+  <div class="footer-links"><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="refund.html">Refund</a><a href="contact.html">Contact</a></div>
+</footer>
+
+<nav class="mobile-bottom-nav">
+  <a href="index.html"><span>⌂</span><small>Home</small></a>
+  <a href="exam.html"><span>✓</span><small>Exams</small></a>
+  <a href="current-affairs.html" class="active"><span>✦</span><small>Current</small></a>
+  <a href="index.html#materials"><span>▣</span><small>PDFs</small></a>
+  <a href="pricing.html"><span>👑</span><small>Premium</small></a>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="ui.js"></script>
+<script src="current-affairs.js"></script>
+</body>
+</html>

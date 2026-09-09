@@ -248,3 +248,61 @@ const paidPrice = document.getElementById("exam-price");
 if (paidSelect && paidPrice) paidSelect.addEventListener("change", () => {
   paidPrice.disabled = paidSelect.value !== "true";
 });
+
+
+// ===== DAILY CURRENT AFFAIRS =====
+const caForm = document.getElementById("ca-form");
+const caAdminStatus = document.getElementById("ca-status-admin");
+const caList = document.getElementById("admin-ca-list");
+if (caForm) {
+  document.getElementById("ca-date").value = new Date().toISOString().slice(0,10);
+
+  caForm.addEventListener("submit", async e => {
+    e.preventDefault();
+    caAdminStatus.textContent = "Publishing…";
+    const { data: { user } } = await db.auth.getUser();
+    if (!user || user.id !== ADMIN_UID) { caAdminStatus.textContent = "Admin authorization required."; return; }
+
+    const points = document.getElementById("ca-points").value.split("\n").map(x=>x.trim()).filter(Boolean).slice(0,6);
+    const payload = {
+      category: document.getElementById("ca-category").value,
+      published_date: document.getElementById("ca-date").value,
+      title: document.getElementById("ca-title").value.trim(),
+      note: document.getElementById("ca-note").value.trim(),
+      points,
+      sort_order: Number(document.getElementById("ca-sort").value || 1),
+      is_published: true,
+      created_by: user.id
+    };
+    const { error } = await db.from("current_affairs").insert(payload);
+    if (error) { caAdminStatus.textContent = error.message; return; }
+    caAdminStatus.textContent = "Published successfully!";
+    caForm.reset();
+    document.getElementById("ca-date").value = new Date().toISOString().slice(0,10);
+    document.getElementById("ca-sort").value = 1;
+    loadAdminCurrentAffairs();
+  });
+}
+async function loadAdminCurrentAffairs(){
+  if(!caList) return;
+  caList.innerHTML="Loading…";
+  const {data,error}=await db.from("current_affairs").select("*").order("published_date",{ascending:false}).order("sort_order",{ascending:true}).limit(30);
+  if(error){caList.innerHTML=`<div class="muted">${esc(error.message)}</div>`;return;}
+  if(!data?.length){caList.innerHTML='<div class="muted">No current-affairs entries yet.</div>';return;}
+  caList.innerHTML=data.map(x=>`
+    <div class="admin-item">
+      <div><b>${esc(x.title)}</b><small>${esc(x.category)} • ${esc(x.published_date)} • ${x.is_published?"Published":"Hidden"}</small></div>
+      <button class="delete-btn ca-delete" data-id="${x.id}">Delete</button>
+    </div>`).join("");
+  caList.querySelectorAll(".ca-delete").forEach(btn=>btn.addEventListener("click",async()=>{
+    if(!confirm("Delete this current-affairs entry?")) return;
+    const {error}=await db.from("current_affairs").delete().eq("id",btn.dataset.id);
+    if(error) alert(error.message); else loadAdminCurrentAffairs();
+  }));
+}
+const oldShowSession=showSession;
+showSession=async function(){
+  await oldShowSession();
+  const { data: { session } } = await db.auth.getSession();
+  if(session && session.user.id===ADMIN_UID) loadAdminCurrentAffairs();
+};

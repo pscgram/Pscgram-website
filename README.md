@@ -25,3 +25,27 @@ Run `paid_exam.sql`, deploy `supabase/functions/paid-exam/index.ts`, and keep th
 
 ## Vercel
 Upload the contents of this folder to the GitHub repository connected to your Vercel project, or upload this ZIP using the deployment method available in your Vercel account. If your existing Vercel project is already connected to GitHub, push these files to the repository and Vercel will redeploy.
+
+
+# PSCGram Premium UI v2 additions
+
+This version keeps the existing Razorpay/Online Exam files and adds:
+- Premium mobile-first home dashboard
+- Daily Current Affairs page
+- Date/category filter UI
+- PSC Quick Fact card
+- Premium membership section
+- Feature/stat cards
+- Admin panel for publishing Daily Current Affairs
+- Supabase SQL schema: `daily_current_affairs.sql`
+
+## One-time Supabase step
+Open Supabase → SQL Editor → paste/run `daily_current_affairs.sql`.
+
+## Then deploy the whole `pscgram_complete` folder to Vercel.
+
+The Current Affairs page includes safe preview cards if the new table has no entries yet.
+
+
+### PSC preparation levels
+Added dedicated Home sections for **10th Level**, **12th Level**, and **Degree Level** with mobile-friendly cards and links into the exam centre.

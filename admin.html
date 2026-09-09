@@ -13,7 +13,7 @@
 <header class="topbar">
   <a class="brand" href="index.html"><span class="brand-mark">P</span><span>PSC<span>Gram</span></span></a>
   <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false">☰</button>
-  <nav id="site-nav" class="top-actions"><a href="index.html">← Website</a></nav>
+  <nav id="site-nav" class="top-actions"><a href="index.html">← Website</a><a href="current-affairs.html">Current Affairs</a></nav>
 </header>
 
 <main class="admin-wrap">
@@ -77,6 +77,21 @@
         <div id="question-status" class="status full"></div>
       </form>
       <div id="admin-questions" class="admin-list"></div>
+    </div>
+
+    <div class="panel">
+      <div class="section-head"><div><h2>Daily Current Affairs</h2><p class="muted">Publish short PSC-focused notes directly to the Current Affairs page.</p></div></div>
+      <form id="ca-form" class="form-grid">
+        <label>Category<select id="ca-category"><option>National</option><option>Kerala</option><option>International</option><option>Science & Tech</option><option>Sports</option><option>Appointments</option><option>Awards</option><option>Important Days</option></select></label>
+        <label>Date<input id="ca-date" type="date" required></label>
+        <label class="full">Headline<input id="ca-title" required placeholder="Short current-affairs headline"></label>
+        <label class="full">Short note<textarea id="ca-note" rows="3" required placeholder="Write 2–4 simple exam-oriented lines"></textarea></label>
+        <label class="full">Key points <span class="muted">(one per line)</span><textarea id="ca-points" rows="3" placeholder="Important fact&#10;Related organisation/person&#10;PSC takeaway"></textarea></label>
+        <label>Sort order<input id="ca-sort" type="number" value="1" min="1"></label>
+        <button class="btn primary" type="submit">Publish Current Affair</button>
+        <div id="ca-status-admin" class="status full"></div>
+      </form>
+      <div id="admin-ca-list" class="admin-list"></div>
     </div>
 
     <div class="panel">
