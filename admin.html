@@ -162,20 +162,29 @@
         <label class="full">Live Exam Title
           <input id="live-title" required placeholder="PSC LIVE EXAM 1">
         </label>
+
         <label class="full">Description
           <textarea id="live-description" rows="2" placeholder="Exam instructions"></textarea>
         </label>
+
         <label>Start date and time
           <input id="live-start" type="datetime-local" required>
         </label>
+
+        <label>Exam Closing Date &amp; Time
+          <input id="live-close" type="datetime-local" required>
+        </label>
+
         <label>Duration (minutes)
           <input id="live-duration" type="number" min="1" value="30" required>
         </label>
+
         <button class="btn primary full" type="submit">Create Live Exam</button>
         <div id="live-exam-status" class="status full"></div>
       </form>
 
       <div class="divider"></div>
+
       <h3>Existing Live Exams</h3>
       <p class="muted">Created exams will appear here once the Live Exam script is connected.</p>
       <div id="live-exam-list" class="admin-list"></div>
@@ -186,13 +195,16 @@
           <label class="full">Exam ID
             <input id="live-question-exam-id" required placeholder="Select or paste exam ID">
           </label>
+
           <label class="full">Question
             <textarea id="live-q-text" rows="3" required placeholder="Enter question"></textarea>
           </label>
+
           <label>Option A<input id="live-q-a" required></label>
           <label>Option B<input id="live-q-b" required></label>
           <label>Option C<input id="live-q-c" required></label>
           <label>Option D<input id="live-q-d" required></label>
+
           <label>Correct option
             <select id="live-q-correct">
               <option value="0">A</option>
@@ -201,9 +213,11 @@
               <option value="3">D</option>
             </select>
           </label>
+
           <label>Marks
             <input id="live-q-marks" type="number" min="1" value="1" required>
           </label>
+
           <button class="btn primary full" type="submit">Add Live Exam Question</button>
           <div id="live-question-status" class="status full"></div>
         </form>
@@ -218,6 +232,7 @@
           <p class="muted">Publish short PSC-focused notes.</p>
         </div>
       </div>
+
       <form id="ca-form" class="form-grid">
         <label>Category
           <select id="ca-category">
@@ -231,25 +246,32 @@
             <option>Important Days</option>
           </select>
         </label>
+
         <label>Date
           <input id="ca-date" type="date" required>
         </label>
+
         <label class="full">Headline
           <input id="ca-title" required placeholder="Short current-affairs headline">
         </label>
+
         <label class="full">Short note
           <textarea id="ca-note" rows="3" required placeholder="Write 2–4 simple exam-oriented lines"></textarea>
         </label>
+
         <label class="full">Key points (one per line)
           <textarea id="ca-points" rows="3" placeholder="Important fact&#10;Related organisation/person&#10;PSC takeaway"></textarea>
         </label>
+
         <label>Sort order
           <input id="ca-sort" type="number" value="1" min="1">
         </label>
+
         <button class="btn primary" type="submit">Publish Current Affair</button>
         <button id="ca-cancel-edit" class="btn ghost hidden" type="button">Cancel Edit</button>
         <div id="ca-status-admin" class="status full"></div>
       </form>
+
       <div id="admin-ca-list" class="admin-list"></div>
     </div>
 
