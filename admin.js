@@ -15,18 +15,14 @@ const uploadStatus = document.getElementById("upload-status");
 
 function esc(v = "") {
   return String(v).replace(/[&<>"']/g, c => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;"
+    "&": "&amp;", "<": "&lt;", ">": "&gt;",
+    '"': "&quot;", "'": "&#039;"
   }[c]));
 }
 
 async function showSession() {
   try {
     const { data: { session }, error } = await db.auth.getSession();
-
     if (error) throw error;
 
     if (session && session.user.id === ADMIN_UID) {
@@ -51,7 +47,6 @@ async function showSession() {
 
 document.getElementById("login-form").addEventListener("submit", async e => {
   e.preventDefault();
-
   loginError.textContent = "Signing in…";
 
   const email = document.getElementById("email").value.trim();
@@ -59,42 +54,39 @@ document.getElementById("login-form").addEventListener("submit", async e => {
 
   try {
     const { data, error } = await db.auth.signInWithPassword({
-      email,
-      password
+      email, password
     });
-
     if (error) throw error;
 
     if (!data.user || data.user.id !== ADMIN_UID) {
       await db.auth.signOut();
       loginError.textContent =
-        "This account is not authorized for the admin dashboard. Please use the registered admin account.";
+        "This account is not authorized for the admin dashboard.";
       return;
     }
 
     loginError.textContent = "";
     await showSession();
   } catch (error) {
-    loginError.textContent = error.message || "Login failed. Please try again.";
+    loginError.textContent = error.message || "Login failed.";
   }
 });
 
 document.getElementById("logout").addEventListener("click", async () => {
   const { error } = await db.auth.signOut();
-
   if (error) {
     alert(error.message);
     return;
   }
-
   await showSession();
 });
 
 document.getElementById("refresh").addEventListener("click", loadAdminProducts);
 
+// ==================== PDF PRODUCTS ====================
+
 document.getElementById("upload-form").addEventListener("submit", async e => {
   e.preventDefault();
-
   uploadStatus.textContent = "Uploading…";
   uploadStatus.className = "status full";
 
@@ -102,8 +94,7 @@ document.getElementById("upload-form").addEventListener("submit", async e => {
     const { data: { user } } = await db.auth.getUser();
 
     if (!user || user.id !== ADMIN_UID) {
-      uploadStatus.textContent = "Admin authorization required.";
-      return;
+      throw new Error("Admin authorization required.");
     }
 
     const title = document.getElementById("title").value.trim();
@@ -112,29 +103,25 @@ document.getElementById("upload-form").addEventListener("submit", async e => {
     const cover_url = document.getElementById("cover").value.trim() || null;
     const file = document.getElementById("pdf").files[0];
 
+    if (!title) throw new Error("Enter a PDF title.");
     if (!file || file.type !== "application/pdf") {
-      uploadStatus.textContent = "Please select a PDF file.";
-      return;
+      throw new Error("Please select a PDF file.");
+    }
+    if (!Number.isFinite(price) || price < 0) {
+      throw new Error("Enter a valid price.");
     }
 
     const safe = file.name.toLowerCase().replace(/[^a-z0-9._-]+/g, "-");
     const path = `${user.id}/${Date.now()}-${safe}`;
 
     const { error: storageError } = await db.storage.from("pdfs").upload(
-      path,
-      file,
-      { contentType: "application/pdf", upsert: false }
+      path, file, { contentType: "application/pdf", upsert: false }
     );
-
     if (storageError) throw storageError;
 
     const { error: productError } = await db.from("products").insert({
-      title,
-      price,
-      description,
-      cover_url,
-      pdf_url: path,
-      created_by: user.id
+      title, price, description, cover_url,
+      pdf_url: path, created_by: user.id
     });
 
     if (productError) {
@@ -153,7 +140,8 @@ document.getElementById("upload-form").addEventListener("submit", async e => {
 
 async function loadAdminProducts() {
   const box = document.getElementById("admin-products");
-  box.innerHTML = "Loading…";
+  if (!box) return;
+  box.textContent = "Loading…";
 
   const { data, error } = await db.from("products")
     .select("*")
@@ -173,9 +161,12 @@ async function loadAdminProducts() {
     <div class="admin-item">
       <div>
         <b>${esc(p.title)}</b>
-        <small>₹${Number(p.price || 0).toFixed(0)} • ${new Date(p.created_at).toLocaleDateString()}</small>
+        <small>₹${Number(p.price || 0).toFixed(0)} •
+          ${new Date(p.created_at).toLocaleDateString()}</small>
       </div>
-      <button class="delete-btn" data-id="${esc(p.id)}" data-path="${esc(p.pdf_url || "")}">Delete</button>
+      <button class="delete-btn"
+        data-id="${esc(p.id)}"
+        data-path="${esc(p.pdf_url || "")}">Delete</button>
     </div>
   `).join("");
 
@@ -195,9 +186,12 @@ async function loadAdminProducts() {
       }
 
       if (path) {
-        const { error: storageError } = await db.storage.from("pdfs").remove([path]);
+        const { error: storageError } =
+          await db.storage.from("pdfs").remove([path]);
+
         if (storageError) {
-          alert("Product deleted, but PDF storage cleanup failed: " + storageError.message);
+          alert("Product deleted, but PDF cleanup failed: " +
+            storageError.message);
         }
       }
 
@@ -206,34 +200,39 @@ async function loadAdminProducts() {
   );
 }
 
-// ===== ONLINE EXAMS =====
+// ==================== NORMAL ONLINE EXAMS ====================
+
 let selectedExamId = null;
 
 document.getElementById("exam-form").addEventListener("submit", async e => {
   e.preventDefault();
-
   const status = document.getElementById("exam-status");
   status.textContent = "Creating…";
 
   try {
     const { data: { user } } = await db.auth.getUser();
-
     if (!user || user.id !== ADMIN_UID) {
-      status.textContent = "Admin authorization required.";
-      return;
+      throw new Error("Admin authorization required.");
     }
 
     const isPaid = document.getElementById("exam-paid").value === "true";
 
     const { data, error } = await db.from("exams").insert({
       title: document.getElementById("exam-title").value.trim(),
-      description: document.getElementById("exam-description").value.trim() || null,
-      duration_minutes: Number(document.getElementById("exam-duration").value),
-      negative_mark: Number(document.getElementById("exam-negative").value || 0),
+      description:
+        document.getElementById("exam-description").value.trim() || null,
+      duration_minutes: Number(
+        document.getElementById("exam-duration").value
+      ),
+      negative_mark: Number(
+        document.getElementById("exam-negative").value || 0
+      ),
       total_marks: 0,
       is_published: false,
       is_paid: isPaid,
-      price: isPaid ? Number(document.getElementById("exam-price").value || 29) : 0
+      price: isPaid
+        ? Number(document.getElementById("exam-price").value || 29)
+        : 0
     }).select().single();
 
     if (error) throw error;
@@ -255,7 +254,8 @@ document.getElementById("exam-form").addEventListener("submit", async e => {
 
 async function loadAdminExams() {
   const box = document.getElementById("admin-exams");
-  box.innerHTML = "Loading…";
+  if (!box) return;
+  box.textContent = "Loading…";
 
   const { data, error } = await db.from("exams")
     .select("*")
@@ -275,13 +275,22 @@ async function loadAdminExams() {
     <div class="admin-item">
       <div>
         <b>${esc(x.title)}</b>
-        <small>${x.duration_minutes} min • ${x.total_marks} marks • ${x.is_paid ? "Paid ₹" + Number(x.price || 0).toFixed(0) : "Free"} • ${x.is_published ? "Published" : "Draft"}</small>
+        <small>${x.duration_minutes} min • ${x.total_marks} marks •
+          ${x.is_paid ? "Paid ₹" + Number(x.price || 0).toFixed(0) : "Free"} •
+          ${x.is_published ? "Published" : "Draft"}</small>
       </div>
       <div class="admin-actions">
-        <button class="btn ghost select-exam" data-id="${esc(x.id)}" data-title="${esc(x.title)}">Questions</button>
-        <button class="btn ghost toggle-exam" data-id="${esc(x.id)}" data-published="${x.is_published}">${x.is_published ? "Unpublish" : "Publish"}</button>
-        <button class="btn ghost price-exam" data-id="${esc(x.id)}" data-paid="${x.is_paid}" data-price="${x.price || 29}">${x.is_paid ? "Set Free" : "Make Paid"}</button>
-        <button class="delete-btn delete-exam" data-id="${esc(x.id)}">Delete</button>
+        <button class="btn ghost select-exam"
+          data-id="${esc(x.id)}" data-title="${esc(x.title)}">Questions</button>
+        <button class="btn ghost toggle-exam"
+          data-id="${esc(x.id)}" data-published="${x.is_published}">
+          ${x.is_published ? "Unpublish" : "Publish"}</button>
+        <button class="btn ghost price-exam"
+          data-id="${esc(x.id)}" data-paid="${x.is_paid}"
+          data-price="${x.price || 29}">
+          ${x.is_paid ? "Set Free" : "Make Paid"}</button>
+        <button class="delete-btn delete-exam" data-id="${esc(x.id)}">
+          Delete</button>
       </div>
     </div>
   `).join("");
@@ -295,7 +304,6 @@ async function loadAdminExams() {
       const { error } = await db.from("exams")
         .update({ is_published: b.dataset.published !== "true" })
         .eq("id", b.dataset.id);
-
       if (error) alert(error.message);
       else await loadAdminExams();
     })
@@ -305,27 +313,20 @@ async function loadAdminExams() {
     b.addEventListener("click", async () => {
       if (b.dataset.paid === "true") {
         if (!confirm("Make this exam free?")) return;
-
         const { error } = await db.from("exams")
-          .update({ is_paid: false, price: 0 })
-          .eq("id", b.dataset.id);
-
+          .update({ is_paid: false, price: 0 }).eq("id", b.dataset.id);
         if (error) alert(error.message);
         else await loadAdminExams();
       } else {
         const value = prompt("Enter exam price in ₹", b.dataset.price || "29");
         if (value === null) return;
-
         const price = Number(value);
         if (!Number.isFinite(price) || price < 1) {
           alert("Enter a valid price of at least ₹1.");
           return;
         }
-
         const { error } = await db.from("exams")
-          .update({ is_paid: true, price })
-          .eq("id", b.dataset.id);
-
+          .update({ is_paid: true, price }).eq("id", b.dataset.id);
         if (error) alert(error.message);
         else await loadAdminExams();
       }
@@ -335,9 +336,7 @@ async function loadAdminExams() {
   box.querySelectorAll(".delete-exam").forEach(b =>
     b.addEventListener("click", async () => {
       if (!confirm("Delete this exam and all its questions/results?")) return;
-
       const { error } = await db.from("exams").delete().eq("id", b.dataset.id);
-
       if (error) alert(error.message);
       else {
         document.getElementById("question-panel").classList.add("hidden");
@@ -350,29 +349,30 @@ async function loadAdminExams() {
 async function selectExam(id, title) {
   selectedExamId = id;
   document.getElementById("question-panel").classList.remove("hidden");
-  document.getElementById("question-panel-title").textContent = "Questions: " + title;
+  document.getElementById("question-panel-title").textContent =
+    "Questions: " + title;
   await loadAdminQuestions();
-  document.getElementById("question-panel").scrollIntoView({ behavior: "smooth" });
+  document.getElementById("question-panel").scrollIntoView({
+    behavior: "smooth"
+  });
 }
 
 document.getElementById("question-form").addEventListener("submit", async e => {
   e.preventDefault();
-
   if (!selectedExamId) return;
 
   const status = document.getElementById("question-status");
   status.textContent = "Adding…";
 
   try {
-    const { data: existing, error: countError } = await db.from("exam_questions")
-      .select("question_order")
+    const { data: existing, error: countError } = await db
+      .from("exam_questions").select("question_order")
       .eq("exam_id", selectedExamId)
-      .order("question_order", { ascending: false })
-      .limit(1);
+      .order("question_order", { ascending: false }).limit(1);
 
     if (countError) throw countError;
-
-    const order = existing?.length ? Number(existing[0].question_order) + 1 : 1;
+    const order = existing?.length
+      ? Number(existing[0].question_order) + 1 : 1;
 
     const { error } = await db.from("exam_questions").insert({
       exam_id: selectedExamId,
@@ -401,19 +401,19 @@ document.getElementById("question-form").addEventListener("submit", async e => {
 
 async function recalcExamMarks() {
   const { data, error } = await db.from("exam_questions")
-    .select("marks")
-    .eq("exam_id", selectedExamId);
+    .select("marks").eq("exam_id", selectedExamId);
 
   if (error) {
     alert(error.message);
     return;
   }
 
-  const total = (data || []).reduce((sum, q) => sum + Number(q.marks || 0), 0);
+  const total = (data || []).reduce(
+    (sum, q) => sum + Number(q.marks || 0), 0
+  );
 
   const { error: updateError } = await db.from("exams")
-    .update({ total_marks: total })
-    .eq("id", selectedExamId);
+    .update({ total_marks: total }).eq("id", selectedExamId);
 
   if (updateError) alert(updateError.message);
   await loadAdminExams();
@@ -421,11 +421,8 @@ async function recalcExamMarks() {
 
 async function loadAdminQuestions() {
   const box = document.getElementById("admin-questions");
-
   const { data, error } = await db.from("exam_questions")
-    .select("*")
-    .eq("exam_id", selectedExamId)
-    .order("question_order");
+    .select("*").eq("exam_id", selectedExamId).order("question_order");
 
   if (error) {
     box.textContent = error.message;
@@ -438,18 +435,20 @@ async function loadAdminQuestions() {
       <div class="admin-item">
         <div>
           <b>Q${i + 1}. ${esc(q.question_text)}</b>
-          <small>A: ${esc(q.option_a)} • B: ${esc(q.option_b)} • C: ${esc(q.option_c)} • D: ${esc(q.option_d)} • Correct: ${esc(q.correct_option)} • ${q.marks} mark(s)</small>
+          <small>A: ${esc(q.option_a)} • B: ${esc(q.option_b)} •
+            C: ${esc(q.option_c)} • D: ${esc(q.option_d)} •
+            Correct: ${esc(q.correct_option)} • ${q.marks} mark(s)</small>
         </div>
-        <button class="delete-btn delete-question" data-id="${esc(q.id)}">Delete</button>
+        <button class="delete-btn delete-question" data-id="${esc(q.id)}">
+          Delete</button>
       </div>
     `).join("");
 
   box.querySelectorAll(".delete-question").forEach(b =>
     b.addEventListener("click", async () => {
       if (!confirm("Delete this question?")) return;
-
-      const { error } = await db.from("exam_questions").delete().eq("id", b.dataset.id);
-
+      const { error } = await db.from("exam_questions")
+        .delete().eq("id", b.dataset.id);
       if (error) alert(error.message);
       else {
         await recalcExamMarks();
@@ -468,17 +467,20 @@ if (paidSelect && paidPrice) {
   });
 }
 
-// ===== DAILY CURRENT AFFAIRS =====
+// ==================== DAILY CURRENT AFFAIRS ====================
+
 const caForm = document.getElementById("ca-form");
 const caAdminStatus = document.getElementById("ca-status-admin");
 const caList = document.getElementById("admin-ca-list");
 let editingCaId = null;
 
 function resetCaForm() {
+  if (!caForm) return;
   editingCaId = null;
   caForm.reset();
 
-  document.getElementById("ca-date").value = new Date().toISOString().slice(0, 10);
+  document.getElementById("ca-date").value =
+    new Date().toISOString().slice(0, 10);
   document.getElementById("ca-sort").value = 1;
 
   const submit = caForm.querySelector('button[type="submit"]');
@@ -493,24 +495,17 @@ if (caForm) {
 
   caForm.addEventListener("submit", async e => {
     e.preventDefault();
-
     caAdminStatus.textContent = editingCaId
-      ? "Updating & republishing…"
-      : "Publishing…";
+      ? "Updating & republishing…" : "Publishing…";
 
     try {
       const { data: { user } } = await db.auth.getUser();
-
       if (!user || user.id !== ADMIN_UID) {
-        caAdminStatus.textContent = "Admin authorization required.";
-        return;
+        throw new Error("Admin authorization required.");
       }
 
       const points = document.getElementById("ca-points").value
-        .split("\n")
-        .map(x => x.trim())
-        .filter(Boolean)
-        .slice(0, 6);
+        .split("\n").map(x => x.trim()).filter(Boolean).slice(0, 6);
 
       const payload = {
         category: document.getElementById("ca-category").value,
@@ -524,15 +519,12 @@ if (caForm) {
       };
 
       let error;
-
       if (editingCaId) {
         ({ error } = await db.from("current_affairs")
-          .update(payload)
-          .eq("id", editingCaId));
+          .update(payload).eq("id", editingCaId));
       } else {
         ({ error } = await db.from("current_affairs").insert(payload));
       }
-
       if (error) throw error;
 
       caAdminStatus.textContent = editingCaId
@@ -542,12 +534,12 @@ if (caForm) {
       resetCaForm();
       await loadAdminCurrentAffairs();
     } catch (error) {
-      caAdminStatus.textContent = error.message || "Could not save current affair.";
+      caAdminStatus.textContent =
+        error.message || "Could not save current affair.";
     }
   });
 
   const cancel = document.getElementById("ca-cancel-edit");
-
   if (cancel) {
     cancel.addEventListener("click", () => {
       resetCaForm();
@@ -558,9 +550,7 @@ if (caForm) {
 
 async function editCurrentAffair(id) {
   const { data, error } = await db.from("current_affairs")
-    .select("*")
-    .eq("id", id)
-    .single();
+    .select("*").eq("id", id).single();
 
   if (error) {
     alert(error.message);
@@ -568,14 +558,13 @@ async function editCurrentAffair(id) {
   }
 
   editingCaId = id;
-
   document.getElementById("ca-category").value = data.category || "National";
-  document.getElementById("ca-date").value = data.published_date || new Date().toISOString().slice(0, 10);
+  document.getElementById("ca-date").value =
+    data.published_date || new Date().toISOString().slice(0, 10);
   document.getElementById("ca-title").value = data.title || "";
   document.getElementById("ca-note").value = data.note || "";
-
-  const points = Array.isArray(data.points) ? data.points : [];
-  document.getElementById("ca-points").value = points.join("\n");
+  document.getElementById("ca-points").value =
+    (Array.isArray(data.points) ? data.points : []).join("\n");
   document.getElementById("ca-sort").value = data.sort_order || 1;
 
   const submit = caForm.querySelector('button[type="submit"]');
@@ -590,14 +579,12 @@ async function editCurrentAffair(id) {
 
 async function loadAdminCurrentAffairs() {
   if (!caList) return;
-
-  caList.innerHTML = "Loading…";
+  caList.textContent = "Loading…";
 
   const { data, error } = await db.from("current_affairs")
     .select("*")
     .order("published_date", { ascending: false })
-    .order("sort_order", { ascending: true })
-    .limit(30);
+    .order("sort_order", { ascending: true }).limit(30);
 
   if (error) {
     caList.innerHTML = `<div class="muted">${esc(error.message)}</div>`;
@@ -613,7 +600,8 @@ async function loadAdminCurrentAffairs() {
     <div class="admin-item">
       <div>
         <b>${esc(x.title)}</b>
-        <small>${esc(x.category)} • ${esc(x.published_date)} • ${x.is_published ? "Published" : "Hidden"}</small>
+        <small>${esc(x.category)} • ${esc(x.published_date)} •
+          ${x.is_published ? "Published" : "Hidden"}</small>
       </div>
       <div class="admin-actions">
         <button class="btn ghost ca-edit" data-id="${esc(x.id)}">Edit</button>
@@ -628,11 +616,9 @@ async function loadAdminCurrentAffairs() {
 
   caList.querySelectorAll(".ca-delete").forEach(btn =>
     btn.addEventListener("click", async () => {
-      if (!confirm("Delete this current-affairs entry? This will remove it from the website.")) return;
-
+      if (!confirm("Delete this current-affairs entry from the website?")) return;
       const { error } = await db.from("current_affairs")
-        .delete()
-        .eq("id", btn.dataset.id);
+        .delete().eq("id", btn.dataset.id);
 
       if (error) {
         alert(error.message);
@@ -644,12 +630,7 @@ async function loadAdminCurrentAffairs() {
   );
 }
 
-showSession();
-
-/* PSCGram Live Exam Management
-   Append this code to the END of admin.js.
-   Uses the existing Supabase client named db.
-*/
+// ==================== LIVE EXAM MANAGEMENT ====================
 
 (() => {
   const liveForm = document.getElementById("live-exam-form");
@@ -669,27 +650,20 @@ showSession();
 
   function safeText(value) {
     return String(value ?? "").replace(/[&<>"']/g, character => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;"
+      "&": "&amp;", "<": "&lt;", ">": "&gt;",
+      '"': "&quot;", "'": "&#39;"
     })[character]);
   }
 
   async function callLiveExam(payload) {
-    const { data, error } = await db.functions.invoke("live-exam", {
+    const { data, error } = await db.functions.invoke("live-exam-v2", {
       body: payload
     });
 
-    if (error) {
-      throw new Error(error.message || "Live Exam request failed.");
-    }
-
+    if (error) throw new Error(error.message || "Live Exam request failed.");
     if (!data || data.error) {
       throw new Error(data?.error || "Unexpected server response.");
     }
-
     return data;
   }
 
@@ -710,43 +684,38 @@ showSession();
           <h3>${safeText(exam.title)}</h3>
           <p>${safeText(exam.description || "")}</p>
           <p><strong>Status:</strong> ${safeText(exam.status)}</p>
-          <p><strong>Starts:</strong>
+          <p><strong>Opens:</strong>
             ${safeText(exam.start_time
-              ? new Date(exam.start_time).toLocaleString()
-              : "Not specified")}
-          </p>
-          <p><strong>Duration:</strong>
-            ${safeText(exam.duration_minutes)} minutes
-          </p>
+              ? new Date(exam.start_time).toLocaleString() : "Not set")}</p>
+          <p><strong>Closes:</strong>
+            ${safeText(exam.close_time
+              ? new Date(exam.close_time).toLocaleString() : "Not set")}</p>
+          <p><strong>Individual duration:</strong>
+            ${safeText(exam.duration_minutes)} minutes</p>
           <p><strong>Exam ID:</strong><br>
-            <code>${safeText(exam.id)}</code>
-          </p>
-          <button class="btn ghost"
-            type="button"
-            data-live-action="select"
-            data-id="${safeText(exam.id)}">
-            Select for adding questions
+            <code>${safeText(exam.id)}</code></p>
+
+          <button class="btn ghost" type="button"
+            data-live-action="select" data-id="${safeText(exam.id)}">
+            Select for questions
           </button>
+
           ${exam.status === "draft" ? `
-            <button class="btn primary"
-              type="button"
-              data-live-action="publish"
-              data-id="${safeText(exam.id)}">
+            <button class="btn primary" type="button"
+              data-live-action="publish" data-id="${safeText(exam.id)}">
               Publish Exam
-            </button>
-          ` : ""}
-          <button class="btn ghost"
-            type="button"
-            data-live-action="leaderboard"
-            data-id="${safeText(exam.id)}">
+            </button>` : ""}
+
+          <button class="btn ghost" type="button"
+            data-live-action="leaderboard" data-id="${safeText(exam.id)}">
             View Leaderboard
           </button>
-          <button class="btn ghost"
-            type="button"
-            data-live-action="publish-leaderboard"
-            data-id="${safeText(exam.id)}">
+
+          <button class="btn ghost" type="button"
+            data-live-action="publish-leaderboard" data-id="${safeText(exam.id)}">
             Publish Leaderboard
           </button>
+
           <div id="live-result-${safeText(exam.id)}" class="status"></div>
         </div>
       `).join("");
@@ -755,7 +724,7 @@ showSession();
     }
   }
 
-  // Create a live exam
+  // Create exam with opening time, closing time and per-user duration.
   liveForm.addEventListener("submit", async event => {
     event.preventDefault();
 
@@ -763,12 +732,35 @@ showSession();
     const description =
       document.getElementById("live-description").value.trim();
     const startValue = document.getElementById("live-start").value;
+    const closeInput = document.getElementById("live-close");
+
+    if (!closeInput) {
+      showLiveStatus(
+        liveStatus,
+        "Please add the closing-time input to admin.html first.",
+        true
+      );
+      return;
+    }
+
+    const closeValue = closeInput.value;
     const duration = Number(
       document.getElementById("live-duration").value
     );
 
-    if (!startValue || !Number.isFinite(duration) || duration < 1) {
-      showLiveStatus(liveStatus, "Enter a valid start time and duration.", true);
+    if (
+      !title ||
+      !startValue ||
+      !closeValue ||
+      !Number.isFinite(duration) ||
+      duration < 1 ||
+      new Date(closeValue) <= new Date(startValue)
+    ) {
+      showLiveStatus(
+        liveStatus,
+        "Enter a title, valid opening time, later closing time and duration.",
+        true
+      );
       return;
     }
 
@@ -780,6 +772,7 @@ showSession();
         title,
         description,
         start_time: new Date(startValue).toISOString(),
+        close_time: new Date(closeValue).toISOString(),
         duration_minutes: duration
       });
 
@@ -790,7 +783,7 @@ showSession();
 
       showLiveStatus(
         liveStatus,
-        "Live exam created. Add questions, then publish the exam."
+        "Exam created. Add questions, then publish the exam."
       );
 
       liveForm.reset();
@@ -801,12 +794,17 @@ showSession();
     }
   });
 
-  // Add a question to a live exam
+  // Add a question to a live exam.
   questionForm.addEventListener("submit", async event => {
     event.preventDefault();
 
     const examId =
       document.getElementById("live-question-exam-id").value.trim();
+
+    if (!examId) {
+      showLiveStatus(questionStatus, "Select an exam first.", true);
+      return;
+    }
 
     const options = [
       document.getElementById("live-q-a").value.trim(),
@@ -819,6 +817,21 @@ showSession();
       document.getElementById("live-q-correct").value
     );
     const marks = Number(document.getElementById("live-q-marks").value);
+
+    if (
+      !document.getElementById("live-q-text").value.trim() ||
+      options.some(option => !option) ||
+      !Number.isInteger(correctAnswer) ||
+      correctAnswer < 0 || correctAnswer > 3 ||
+      !Number.isFinite(marks) || marks <= 0
+    ) {
+      showLiveStatus(
+        questionStatus,
+        "Complete the question, all options, correct answer and marks.",
+        true
+      );
+      return;
+    }
 
     showLiveStatus(questionStatus, "Adding question…");
 
@@ -841,7 +854,7 @@ showSession();
     }
   });
 
-  // Handle actions on each live exam
+  // Buttons on each exam card.
   examList.addEventListener("click", async event => {
     const button = event.target.closest("[data-live-action]");
     if (!button) return;
@@ -851,7 +864,7 @@ showSession();
 
     if (action === "select") {
       document.getElementById("live-question-exam-id").value = examId;
-      questionStatus.textContent = "Selected exam: " + examId;
+      showLiveStatus(questionStatus, "Selected exam: " + examId);
       questionForm.scrollIntoView({ behavior: "smooth", block: "start" });
       return;
     }
@@ -861,15 +874,8 @@ showSession();
 
     try {
       if (action === "publish") {
-        await callLiveExam({
-          action: "publish_exam",
-          exam_id: examId
-        });
-
-        if (resultBox) {
-          resultBox.textContent = "Exam published successfully.";
-        }
-
+        await callLiveExam({ action: "publish_exam", exam_id: examId });
+        if (resultBox) resultBox.textContent = "Exam published successfully.";
         await loadLiveExams();
       }
 
@@ -878,10 +884,9 @@ showSession();
           action: "publish_leaderboard",
           exam_id: examId
         });
-
         if (resultBox) {
           resultBox.textContent =
-            data.message || "Leaderboard publication request completed.";
+            data.message || "Leaderboard request completed.";
         }
       }
 
@@ -892,7 +897,6 @@ showSession();
         });
 
         const leaderboard = data.leaderboard || [];
-
         if (!resultBox) return;
 
         if (!leaderboard.length) {
@@ -900,32 +904,26 @@ showSession();
         } else {
           resultBox.innerHTML = "<strong>Leaderboard</strong><ol>" +
             leaderboard.map(item => `
-              <li>
-                ${safeText(item.name || item.email || item.user_id || "Student")}
-                — Score: ${safeText(item.score)}
-              </li>
-            `).join("") +
-            "</ol>";
+              <li>${safeText(
+                item.name || item.email || item.user_id || "Student"
+              )} — Score: ${safeText(item.score)}</li>
+            `).join("") + "</ol>";
         }
       }
     } catch (error) {
-      if (resultBox) {
-        resultBox.textContent = "Error: " + error.message;
-      }
+      if (resultBox) resultBox.textContent = "Error: " + error.message;
     } finally {
       button.disabled = false;
     }
   });
 
-  // Load the list if a user is already signed in.
   db.auth.getSession().then(({ data }) => {
     if (data?.session) loadLiveExams();
   });
 
-  // Also refresh after a new sign-in.
   db.auth.onAuthStateChange(event => {
     if (event === "SIGNED_IN") loadLiveExams();
   });
 })();
 
-
+showSession();
