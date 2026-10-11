@@ -645,3 +645,287 @@ async function loadAdminCurrentAffairs() {
 }
 
 showSession();
+
+/* PSCGram Live Exam Management
+   Append this code to the END of admin.js.
+   Uses the existing Supabase client named db.
+*/
+
+(() => {
+  const liveForm = document.getElementById("live-exam-form");
+  const questionForm = document.getElementById("live-question-form");
+  const examList = document.getElementById("live-exam-list");
+
+  if (!liveForm || !questionForm || !examList) return;
+
+  const liveStatus = document.getElementById("live-exam-status");
+  const questionStatus = document.getElementById("live-question-status");
+
+  function showLiveStatus(element, message, isError = false) {
+    if (!element) return;
+    element.textContent = message;
+    element.style.color = isError ? "#c62828" : "#16803c";
+  }
+
+  function safeText(value) {
+    return String(value ?? "").replace(/[&<>"']/g, character => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    })[character]);
+  }
+
+  async function callLiveExam(payload) {
+    const { data, error } = await db.functions.invoke("live-exam", {
+      body: payload
+    });
+
+    if (error) {
+      throw new Error(error.message || "Live Exam request failed.");
+    }
+
+    if (!data || data.error) {
+      throw new Error(data?.error || "Unexpected server response.");
+    }
+
+    return data;
+  }
+
+  async function loadLiveExams() {
+    examList.textContent = "Loading live exams…";
+
+    try {
+      const data = await callLiveExam({ action: "list_exams" });
+      const exams = data.exams || [];
+
+      if (!exams.length) {
+        examList.textContent = "No live exams created yet.";
+        return;
+      }
+
+      examList.innerHTML = exams.map(exam => `
+        <div class="panel">
+          <h3>${safeText(exam.title)}</h3>
+          <p>${safeText(exam.description || "")}</p>
+          <p><strong>Status:</strong> ${safeText(exam.status)}</p>
+          <p><strong>Starts:</strong>
+            ${safeText(exam.start_time
+              ? new Date(exam.start_time).toLocaleString()
+              : "Not specified")}
+          </p>
+          <p><strong>Duration:</strong>
+            ${safeText(exam.duration_minutes)} minutes
+          </p>
+          <p><strong>Exam ID:</strong><br>
+            <code>${safeText(exam.id)}</code>
+          </p>
+          <button class="btn ghost"
+            type="button"
+            data-live-action="select"
+            data-id="${safeText(exam.id)}">
+            Select for adding questions
+          </button>
+          ${exam.status === "draft" ? `
+            <button class="btn primary"
+              type="button"
+              data-live-action="publish"
+              data-id="${safeText(exam.id)}">
+              Publish Exam
+            </button>
+          ` : ""}
+          <button class="btn ghost"
+            type="button"
+            data-live-action="leaderboard"
+            data-id="${safeText(exam.id)}">
+            View Leaderboard
+          </button>
+          <button class="btn ghost"
+            type="button"
+            data-live-action="publish-leaderboard"
+            data-id="${safeText(exam.id)}">
+            Publish Leaderboard
+          </button>
+          <div id="live-result-${safeText(exam.id)}" class="status"></div>
+        </div>
+      `).join("");
+    } catch (error) {
+      examList.textContent = "Could not load live exams: " + error.message;
+    }
+  }
+
+  // Create a live exam
+  liveForm.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const title = document.getElementById("live-title").value.trim();
+    const description =
+      document.getElementById("live-description").value.trim();
+    const startValue = document.getElementById("live-start").value;
+    const duration = Number(
+      document.getElementById("live-duration").value
+    );
+
+    if (!startValue || !Number.isFinite(duration) || duration < 1) {
+      showLiveStatus(liveStatus, "Enter a valid start time and duration.", true);
+      return;
+    }
+
+    showLiveStatus(liveStatus, "Creating live exam…");
+
+    try {
+      const data = await callLiveExam({
+        action: "create_exam",
+        title,
+        description,
+        start_time: new Date(startValue).toISOString(),
+        duration_minutes: duration
+      });
+
+      if (data.exam?.id) {
+        document.getElementById("live-question-exam-id").value =
+          data.exam.id;
+      }
+
+      showLiveStatus(
+        liveStatus,
+        "Live exam created. Add questions, then publish the exam."
+      );
+
+      liveForm.reset();
+      document.getElementById("live-duration").value = "30";
+      await loadLiveExams();
+    } catch (error) {
+      showLiveStatus(liveStatus, error.message, true);
+    }
+  });
+
+  // Add a question to a live exam
+  questionForm.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const examId =
+      document.getElementById("live-question-exam-id").value.trim();
+
+    const options = [
+      document.getElementById("live-q-a").value.trim(),
+      document.getElementById("live-q-b").value.trim(),
+      document.getElementById("live-q-c").value.trim(),
+      document.getElementById("live-q-d").value.trim()
+    ];
+
+    const correctAnswer = Number(
+      document.getElementById("live-q-correct").value
+    );
+    const marks = Number(document.getElementById("live-q-marks").value);
+
+    showLiveStatus(questionStatus, "Adding question…");
+
+    try {
+      await callLiveExam({
+        action: "add_question",
+        exam_id: examId,
+        question_text: document.getElementById("live-q-text").value.trim(),
+        options,
+        correct_answer: correctAnswer,
+        marks
+      });
+
+      showLiveStatus(questionStatus, "Question added successfully.");
+      questionForm.reset();
+      document.getElementById("live-question-exam-id").value = examId;
+      document.getElementById("live-q-marks").value = "1";
+    } catch (error) {
+      showLiveStatus(questionStatus, error.message, true);
+    }
+  });
+
+  // Handle actions on each live exam
+  examList.addEventListener("click", async event => {
+    const button = event.target.closest("[data-live-action]");
+    if (!button) return;
+
+    const action = button.dataset.liveAction;
+    const examId = button.dataset.id;
+
+    if (action === "select") {
+      document.getElementById("live-question-exam-id").value = examId;
+      questionStatus.textContent = "Selected exam: " + examId;
+      questionForm.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+
+    const resultBox = document.getElementById("live-result-" + examId);
+    button.disabled = true;
+
+    try {
+      if (action === "publish") {
+        await callLiveExam({
+          action: "publish_exam",
+          exam_id: examId
+        });
+
+        if (resultBox) {
+          resultBox.textContent = "Exam published successfully.";
+        }
+
+        await loadLiveExams();
+      }
+
+      if (action === "publish-leaderboard") {
+        const data = await callLiveExam({
+          action: "publish_leaderboard",
+          exam_id: examId
+        });
+
+        if (resultBox) {
+          resultBox.textContent =
+            data.message || "Leaderboard publication request completed.";
+        }
+      }
+
+      if (action === "leaderboard") {
+        const data = await callLiveExam({
+          action: "get_leaderboard",
+          exam_id: examId
+        });
+
+        const leaderboard = data.leaderboard || [];
+
+        if (!resultBox) return;
+
+        if (!leaderboard.length) {
+          resultBox.textContent = "No leaderboard results available yet.";
+        } else {
+          resultBox.innerHTML = "<strong>Leaderboard</strong><ol>" +
+            leaderboard.map(item => `
+              <li>
+                ${safeText(item.name || item.email || item.user_id || "Student")}
+                — Score: ${safeText(item.score)}
+              </li>
+            `).join("") +
+            "</ol>";
+        }
+      }
+    } catch (error) {
+      if (resultBox) {
+        resultBox.textContent = "Error: " + error.message;
+      }
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  // Load the list if a user is already signed in.
+  db.auth.getSession().then(({ data }) => {
+    if (data?.session) loadLiveExams();
+  });
+
+  // Also refresh after a new sign-in.
+  db.auth.onAuthStateChange(event => {
+    if (event === "SIGNED_IN") loadLiveExams();
+  });
+})();
+
+
