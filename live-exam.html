@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Live Exam | PSCGram</title>
+  <title>PSCGram Live Exams</title>
   <style>
     *{box-sizing:border-box}
     body{margin:0;background:#f4f7fb;color:#172033;font-family:Arial,sans-serif}
@@ -41,11 +41,15 @@
 <main>
   <section class="card" id="auth-card">
     <h1>Student Sign In</h1>
-    <p class="muted">Sign in with your PSCGram account to join a live exam.</p>
-    <label>Email address<input id="email" type="email" autocomplete="email" required></label>
-    <label>Password<input id="password" type="password" autocomplete="current-password" required></label>
+    <p class="muted">Sign in to your PSCGram account to join a live exam.</p>
+    <label>Email address
+      <input id="email" type="email" autocomplete="email">
+    </label>
+    <label>Password
+      <input id="password" type="password" autocomplete="current-password">
+    </label>
     <div class="actions">
-      <button id="signin-btn">Sign In</button>
+      <button id="signin-btn" type="button">Sign In</button>
       <button class="secondary" id="signup-btn" type="button">Create Account</button>
     </div>
     <p id="auth-status" class="status muted"></p>
@@ -53,7 +57,7 @@
 
   <section class="card hidden" id="list-card">
     <h1>Available Live Exams</h1>
-    <p class="muted">Choose a published exam. Follow its scheduled start and closing times.</p>
+    <p class="muted">Choose a published exam and follow its scheduled times.</p>
     <button id="refresh-btn" class="secondary" type="button">Refresh Exams</button>
     <div id="exam-list" class="status">Loading exams…</div>
     <p id="list-status" class="status muted"></p>
@@ -93,7 +97,7 @@
 
   if (!config || !config.SUPABASE_URL || !config.SUPABASE_PUBLISHABLE_KEY) {
     $('auth-status').textContent =
-      'Configuration not found. Please check config.js and its Supabase settings.';
+      'Supabase configuration is missing. Check config.js.';
     $('signin-btn').disabled = true;
     $('signup-btn').disabled = true;
     return;
@@ -103,6 +107,7 @@
     config.SUPABASE_URL,
     config.SUPABASE_PUBLISHABLE_KEY
   );
+
   const FN = 'live-exam-v2';
   let currentExam = null;
   let questions = [];
@@ -119,109 +124,122 @@
   async function invoke(action, extra = {}) {
     const { data: { session } } = await db.auth.getSession();
     if (!session) throw new Error('Please sign in first.');
+
     const { data, error } = await db.functions.invoke(FN, {
       body: { action, ...extra }
     });
+
     if (error) {
-      let detail = error.message || 'Request failed.';
+      let message = error.message || 'Request failed.';
       try {
         if (error.context && typeof error.context.json === 'function') {
-          const body = await error.context.json();
-          detail = body.error || detail;
+          const detail = await error.context.json();
+          message = detail.error || message;
         }
       } catch (_) {}
-      throw new Error(detail);
+      throw new Error(message);
     }
+
     if (data && data.error) throw new Error(data.error);
     return data;
   }
 
-  function getExamId() {
-    return new URLSearchParams(window.location.search).get('exam');
+  function examIdFromUrl() {
+    return new URLSearchParams(location.search).get('exam');
   }
 
-  function displayList(exams) {
-    const list = $('exam-list');
-    list.replaceChildren();
-
-    if (!exams.length) {
-      list.textContent = 'No published live exams were returned.';
-      return;
-    }
-
-    exams.forEach(exam => {
-      const item = document.createElement('div');
-      item.className = 'exam-item';
-
-      const title = document.createElement('h3');
-      title.textContent = exam.title || 'Live Exam';
-
-      const description = document.createElement('p');
-      description.className = 'muted';
-      description.textContent = exam.description || 'PSC practice exam';
-
-      const details = document.createElement('p');
-      details.className = 'muted';
-      details.textContent =
-        'Starts: ' + (exam.start_time ? new Date(exam.start_time).toLocaleString() : 'Not specified') +
-        ' | Closes: ' + (exam.close_time ? new Date(exam.close_time).toLocaleString() : 'Not specified') +
-        ' | Duration: ' + (exam.duration_minutes || '?') + ' minutes';
-
-      const btn = document.createElement('button');
-      btn.textContent = 'Open Exam';
-      btn.addEventListener('click', () => {
-        window.location.href = 'live-exam.html?exam=' + encodeURIComponent(exam.id);
-      });
-
-      item.append(title, description, details, btn);
-      list.appendChild(item);
-    });
+  function normalizeExams(data) {
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.exams)) return data.exams;
+    if (Array.isArray(data?.data?.exams)) return data.data.exams;
+    if (Array.isArray(data?.data)) return data.data;
+    return [];
   }
 
   async function loadExams() {
     say('list-status', 'Loading published exams…');
-    $('exam-list').textContent = '';
+    $('exam-list').replaceChildren();
+
     try {
       const data = await invoke('list_exams');
-      const exams = Array.isArray(data) ? data :
-        data.exams || data.data?.exams || data.data || [];
-      displayList(exams.filter(e => e.status === 'published'));
+      const exams = normalizeExams(data).filter(
+        exam => exam.status === 'published'
+      );
+
+      if (!exams.length) {
+        $('exam-list').textContent = 'No published live exams found.';
+        return;
+      }
+
+      exams.forEach(exam => {
+        const item = document.createElement('div');
+        item.className = 'exam-item';
+
+        const title = document.createElement('h3');
+        title.textContent = exam.title || 'Live Exam';
+
+        const desc = document.createElement('p');
+        desc.className = 'muted';
+        desc.textContent = exam.description || 'PSC practice exam';
+
+        const details = document.createElement('p');
+        details.className = 'muted';
+        details.textContent =
+          'Starts: ' + (exam.start_time ? new Date(exam.start_time).toLocaleString() : 'Not specified') +
+          ' | Closes: ' + (exam.close_time ? new Date(exam.close_time).toLocaleString() : 'Not specified') +
+          ' | Duration: ' + (exam.duration_minutes || '?') + ' minutes';
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = 'Open Exam';
+        button.addEventListener('click', () => {
+          location.href = 'live-exam.html?exam=' + encodeURIComponent(exam.id);
+        });
+
+        item.append(title, desc, details, button);
+        $('exam-list').appendChild(item);
+      });
+
       say('list-status', '');
-    } catch (e) {
-      say('list-status', 'Could not load live exams: ' + e.message +
-        '\nThe live-exam-v2 function must allow signed-in students to list published exams.');
+    } catch (error) {
+      say('list-status', 'Could not load exams: ' + error.message);
     }
   }
 
-  async function loadExam(examId) {
-    say('exam-status', 'Loading exam questions…');
+  async function loadExam(id) {
+    say('exam-status', 'Loading exam…');
+
     try {
-      const data = await invoke('get_questions', { exam_id: examId });
+      const data = await invoke('get_questions', { exam_id: id });
       currentExam = data.exam || data.data?.exam || null;
       questions = data.questions || data.data?.questions || [];
       deadline = data.attempt_deadline || data.data?.attempt_deadline || null;
 
-      if (!questions.length) throw new Error('No questions were returned for this exam.');
+      if (!currentExam) throw new Error('Exam details were not returned.');
+      if (!Array.isArray(questions) || !questions.length) {
+        throw new Error('No questions were returned.');
+      }
+      if (!deadline || !Number.isFinite(new Date(deadline).getTime())) {
+        throw new Error('The server did not return a valid attempt deadline.');
+      }
+
       answers = {};
       questionIndex = 0;
+      busy = false;
 
-      if (currentExam) {
-        $('exam-title').textContent = currentExam.title || 'Live Exam';
-        $('exam-description').textContent = currentExam.description || '';
-      }
-
-      if (!deadline) {
-        throw new Error('The server did not return an attempt deadline. Please check the live-exam-v2 function.');
-      }
+      $('exam-title').textContent = currentExam.title || 'Live Exam';
+      $('exam-description').textContent = currentExam.description || '';
 
       hide('list-card');
       hide('result-card');
       show('exam-card');
       say('exam-status', '');
+      $('submit-btn').disabled = false;
+
       renderQuestion();
       startTimer();
-    } catch (e) {
-      say('exam-status', 'Could not open exam: ' + e.message);
+    } catch (error) {
+      say('exam-status', 'Could not open exam: ' + error.message);
     }
   }
 
@@ -229,9 +247,7 @@
     const q = questions[questionIndex];
     if (!q) return;
 
-    $('question-count').textContent =
-      'Question ' + (questionIndex + 1) + ' of ' + questions.length;
-
+    say('question-count', 'Question ' + (questionIndex + 1) + ' of ' + questions.length);
     const area = $('question-area');
     area.replaceChildren();
 
@@ -243,40 +259,36 @@
     if (typeof options === 'string') {
       try { options = JSON.parse(options); } catch (_) { options = []; }
     }
+
+    const addOption = (key, text) => {
+      const label = document.createElement('label');
+      label.className = 'option';
+
+      const radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.name = 'answer';
+      radio.value = String(key);
+      radio.checked = String(answers[q.id] ?? '') === String(key);
+      radio.addEventListener('change', () => {
+        answers[q.id] = String(key);
+      });
+
+      label.append(radio, document.createTextNode(' ' + String(text)));
+      area.appendChild(label);
+    };
+
     if (Array.isArray(options)) {
-      options.forEach((option, i) => {
-        const value = typeof option === 'object' ?
-          String(option.value ?? option.id ?? option.text ?? i) : String(option);
-        const labelText = typeof option === 'object' ?
-          String(option.text ?? option.label ?? option.value ?? option.id ?? ('Option ' + (i + 1))) :
-          option;
-
-        const label = document.createElement('label');
-        label.className = 'option';
-
-        const radio = document.createElement('input');
-        radio.type = 'radio';
-        radio.name = 'answer';
-        radio.value = value;
-        radio.checked = String(answers[q.id] ?? '') === value;
-        radio.addEventListener('change', () => { answers[q.id] = value; });
-
-        label.append(radio, document.createTextNode(' ' + labelText));
-        area.appendChild(label);
+      options.forEach((option, index) => {
+        const key = typeof option === 'object'
+          ? String(option.value ?? option.id ?? option.text ?? index)
+          : String(option);
+        const text = typeof option === 'object'
+          ? String(option.text ?? option.label ?? option.value ?? option.id ?? ('Option ' + (index + 1)))
+          : option;
+        addOption(key, text);
       });
     } else if (options && typeof options === 'object') {
-      Object.entries(options).forEach(([key, value]) => {
-        const label = document.createElement('label');
-        label.className = 'option';
-        const radio = document.createElement('input');
-        radio.type = 'radio';
-        radio.name = 'answer';
-        radio.value = key;
-        radio.checked = String(answers[q.id] ?? '') === key;
-        radio.addEventListener('change', () => { answers[q.id] = key; });
-        label.append(radio, document.createTextNode(' ' + String(value)));
-        area.appendChild(label);
-      });
+      Object.entries(options).forEach(([key, value]) => addOption(key, value));
     }
 
     $('prev-btn').disabled = questionIndex === 0;
@@ -285,62 +297,108 @@
 
   function startTimer() {
     clearInterval(timerHandle);
+
     const tick = () => {
       const remaining = new Date(deadline).getTime() - Date.now();
+
       if (!Number.isFinite(remaining) || remaining <= 0) {
         $('timer').textContent = '00:00';
         clearInterval(timerHandle);
         submitExam(true);
         return;
       }
-      const total = Math.floor(remaining / 1000);
-      const min = Math.floor(total / 60);
-      const sec = total % 60;
+
+      const seconds = Math.floor(remaining / 1000);
       $('timer').textContent =
-        String(min).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+        String(Math.floor(seconds / 60)).padStart(2, '0') + ':' +
+        String(seconds % 60).padStart(2, '0');
     };
+
     tick();
     timerHandle = setInterval(tick, 1000);
   }
 
+  function makeAnswerPayload() {
+    return questions.map(q => {
+      if (answers[q.id] === undefined) return null;
+
+      let options = q.options;
+      if (typeof options === 'string') {
+        try { options = JSON.parse(options); } catch (_) { options = []; }
+      }
+
+      const selected = String(answers[q.id]);
+      let answerIndex = -1;
+
+      if (Array.isArray(options)) {
+        answerIndex = options.findIndex((option, index) => {
+          const value = typeof option === 'object'
+            ? String(option.value ?? option.id ?? option.text ?? index)
+            : String(option);
+          return value === selected;
+        });
+      } else if (options && typeof options === 'object') {
+        answerIndex = Object.keys(options).indexOf(selected);
+      }
+
+      if (answerIndex < 0) return null;
+
+      return {
+        question_id: q.id,
+        answer_index: answerIndex
+      };
+    }).filter(Boolean);
+  }
+
   async function submitExam(automatic = false) {
-    if (busy) return;
-    if (!automatic && !confirm('Submit your answers now? You cannot change them afterwards.')) return;
+    if (busy || !currentExam) return;
+
+    if (!automatic &&
+        !confirm('Submit your answers now? You cannot change them afterwards.')) {
+      return;
+    }
+
     busy = true;
     $('submit-btn').disabled = true;
-    say('exam-status', automatic ? 'Time is over. Submitting…' : 'Submitting your exam securely…');
+    say('exam-status', automatic ? 'Time is over. Submitting…' : 'Submitting securely…');
 
     try {
-      clearInterval(timerHandle);
+      const answerPayload = makeAnswerPayload();
+
       const response = await invoke('submit_exam', {
         exam_id: currentExam.id,
-        answers
+        answers: answerPayload
       });
 
+      clearInterval(timerHandle);
       hide('exam-card');
       show('result-card');
+
       const result = response.result || response.data?.result || response;
-      say('result-text',
-        'Your exam has been submitted.\n' +
-        (result.score !== undefined ? 'Score: ' + result.score + '\n' : '') +
-        (result.total_marks !== undefined ? 'Total marks: ' + result.total_marks + '\n' : '') +
-        (result.message || 'Your result has been recorded.')
-      );
+      let message = 'Your exam has been submitted.\n';
+
+      if (result.score !== undefined) message += 'Score: ' + result.score + '\n';
+      if (result.total_marks !== undefined) message += 'Total marks: ' + result.total_marks + '\n';
+      if (result.message) message += result.message;
+
+      say('result-text', message);
       await loadLeaderboard(currentExam.id);
-    } catch (e) {
-      say('exam-status', 'Submission failed: ' + e.message +
-        '\nDo not close this page yet. Check your connection and try again.');
+    } catch (error) {
+      say('exam-status', 'Submission failed: ' + error.message +
+        '\nPlease check your connection. Your answers are still on this page.');
       $('submit-btn').disabled = false;
-      if (automatic) busy = false;
+      busy = false;
     }
   }
 
-  async function loadLeaderboard(examId) {
+  async function loadLeaderboard(id) {
     const target = $('leaderboard');
     target.replaceChildren();
+
     try {
-      const data = await invoke('get_leaderboard', { exam_id: examId });
+      const data = await invoke('get_leaderboard', { exam_id: id });
       const rows = data.leaderboard || data.data?.leaderboard || data.data || [];
+
       const heading = document.createElement('h3');
       heading.textContent = 'Leaderboard';
       target.appendChild(heading);
@@ -350,9 +408,9 @@
         return;
       }
 
-      rows.forEach((row, i) => {
+      rows.forEach((row, index) => {
         const line = document.createElement('p');
-        line.textContent = (i + 1) + '. ' +
+        line.textContent = (index + 1) + '. ' +
           (row.name || row.display_name || 'Student') +
           (row.score !== undefined ? ' — ' + row.score + ' marks' : '');
         target.appendChild(line);
@@ -365,57 +423,81 @@
   $('signin-btn').addEventListener('click', async () => {
     const email = $('email').value.trim();
     const password = $('password').value;
+
     if (!email || !password) {
       say('auth-status', 'Enter your email and password.');
       return;
     }
+
     say('auth-status', 'Signing in…');
     const { error } = await db.auth.signInWithPassword({ email, password });
+
     if (error) {
       say('auth-status', error.message);
       return;
     }
+
     await afterSignIn();
   });
 
   $('signup-btn').addEventListener('click', async () => {
     const email = $('email').value.trim();
     const password = $('password').value;
+
     if (!email || password.length < 6) {
       say('auth-status', 'Enter a valid email and a password of at least 6 characters.');
       return;
     }
+
     say('auth-status', 'Creating account…');
     const { error } = await db.auth.signUp({ email, password });
-    say('auth-status', error ? error.message :
-      'Account request sent. If email confirmation is enabled, confirm your email, then sign in.');
+
+    say('auth-status', error
+      ? error.message
+      : 'Account request sent. If email confirmation is enabled, confirm your email before signing in.');
   });
 
   async function afterSignIn() {
-    show('list-card');
     hide('auth-card');
-    const id = getExamId();
+    show('list-card');
+
+    const id = examIdFromUrl();
     if (id) await loadExam(id);
     else await loadExams();
   }
 
   $('refresh-btn').addEventListener('click', loadExams);
+
   $('signout-btn').addEventListener('click', async () => {
     await db.auth.signOut();
-    window.location.href = 'live-exam.html';
-  });
-  $('prev-btn').addEventListener('click', () => {
-    if (questionIndex > 0) { questionIndex--; renderQuestion(); }
-  });
-  $('next-btn').addEventListener('click', () => {
-    if (questionIndex < questions.length - 1) { questionIndex++; renderQuestion(); }
-  });
-  $('submit-btn').addEventListener('click', () => submitExam(false));
-  $('back-btn').addEventListener('click', () => {
-    window.location.href = 'live-exam.html';
+    location.href = 'live-exam.html';
   });
 
-  db.auth.getSession().then(({ data }) => {
+  $('prev-btn').addEventListener('click', () => {
+    if (questionIndex > 0) {
+      questionIndex--;
+      renderQuestion();
+    }
+  });
+
+  $('next-btn').addEventListener('click', () => {
+    if (questionIndex < questions.length - 1) {
+      questionIndex++;
+      renderQuestion();
+    }
+  });
+
+  $('submit-btn').addEventListener('click', () => submitExam(false));
+
+  $('back-btn').addEventListener('click', () => {
+    location.href = 'live-exam.html';
+  });
+
+  db.auth.getSession().then(({ data, error }) => {
+    if (error) {
+      say('auth-status', error.message);
+      return;
+    }
     if (data.session) afterSignIn();
   });
 })();
