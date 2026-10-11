@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -10,84 +11,241 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="admin-body">
+
 <header class="topbar">
-  <a class="brand" href="index.html"><span class="brand-mark">P</span><span>PSC<span>Gram</span></span></a>
+  <a class="brand" href="index.html">
+    <span class="brand-mark">P</span>
+    <span>PSC<span>Gram</span></span>
+  </a>
   <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false">☰</button>
-  <nav id="site-nav" class="top-actions"><a href="index.html">← Website</a><a href="current-affairs.html">Current Affairs</a></nav>
+  <nav id="site-nav" class="top-actions">
+    <a href="index.html">← Website</a>
+    <a href="current-affairs.html">Current Affairs</a>
+  </nav>
 </header>
 
 <main class="admin-wrap">
+
+  <!-- ADMIN LOGIN -->
   <section id="login-panel" class="panel auth-panel">
     <div class="eyebrow">PRIVATE AREA</div>
     <h1>Admin Login</h1>
-    <p class="muted">Use the Supabase admin email and password you created.</p>
+    <p class="muted">Use your Supabase admin email and password.</p>
     <form id="login-form">
-      <label>Email<input id="email" type="email" required autocomplete="email"></label>
-      <label>Password<input id="password" type="password" required autocomplete="current-password"></label>
+      <label>Email
+        <input id="email" type="email" required autocomplete="email">
+      </label>
+      <label>Password
+        <input id="password" type="password" required autocomplete="current-password">
+      </label>
       <button class="btn primary" type="submit">Sign in</button>
       <div id="login-error" class="error"></div>
     </form>
   </section>
 
+  <!-- DASHBOARD -->
   <section id="dashboard" class="hidden">
+
     <div class="dash-head">
-      <div><div class="eyebrow">PSCGRAM CONTROL CENTER</div><h1>Admin Dashboard</h1></div>
+      <div>
+        <div class="eyebrow">PSCGRAM CONTROL CENTER</div>
+        <h1>Admin Dashboard</h1>
+      </div>
       <button id="logout" class="btn ghost">Sign out</button>
     </div>
 
+    <!-- PDF UPLOAD -->
     <div class="panel">
-      <div class="section-head"><div><h2>Upload a PDF</h2><p class="muted">Add a product to the public website.</p></div></div>
+      <div class="section-head">
+        <div>
+          <h2>Upload a PDF</h2>
+          <p class="muted">Add a product to the public website.</p>
+        </div>
+      </div>
       <form id="upload-form" class="form-grid">
-        <label>Title<input id="title" required placeholder="CURRENT AFFAIRS 2025"></label>
-        <label>Price (₹)<input id="price" type="number" min="0" step="1" value="99" required></label>
-        <label class="full">Description<textarea id="description" rows="3" placeholder="Complete edition, exam focused..."></textarea></label>
-        <label>Cover image URL <span class="muted">(optional)</span><input id="cover" placeholder="https://..."></label>
-        <label>PDF file<input id="pdf" type="file" accept="application/pdf" required></label>
-        <button class="btn primary full" type="submit">Upload & Publish</button>
+        <label>Title
+          <input id="title" required placeholder="CURRENT AFFAIRS 2025">
+        </label>
+        <label>Price (₹)
+          <input id="price" type="number" min="0" step="1" value="99" required>
+        </label>
+        <label class="full">Description
+          <textarea id="description" rows="3" placeholder="Complete edition, exam focused..."></textarea>
+        </label>
+        <label>Cover image URL (optional)
+          <input id="cover" placeholder="https://...">
+        </label>
+        <label>PDF file
+          <input id="pdf" type="file" accept="application/pdf" required>
+        </label>
+        <button class="btn primary full" type="submit">Upload &amp; Publish</button>
         <div id="upload-status" class="status full"></div>
       </form>
     </div>
 
+    <!-- NORMAL ONLINE EXAMS -->
     <div class="panel">
-      <div class="section-head"><div><h2>Online Exams</h2><p class="muted">Create PSC-style mock tests and add questions.</p></div></div>
+      <div class="section-head">
+        <div>
+          <h2>Online Exams</h2>
+          <p class="muted">Create PSC-style mock tests and add questions.</p>
+        </div>
+      </div>
       <form id="exam-form" class="form-grid">
-        <label>Exam title<input id="exam-title" required placeholder="CURRENT AFFAIRS MOCK TEST 1"></label>
-        <label>Duration (minutes)<input id="exam-duration" type="number" min="1" value="30" required></label>
-        <label>Negative mark per wrong answer<input id="exam-negative" type="number" min="0" step="0.01" value="0"></label>
-        <label>Exam type<select id="exam-paid"><option value="false">Free</option><option value="true">Paid</option></select></label>
-        <label>Price (₹)<input id="exam-price" type="number" min="1" step="1" value="29" disabled></label>
-        <label class="full">Description<textarea id="exam-description" rows="2" placeholder="50 questions • PSC focused"></textarea></label>
+        <label>Exam title
+          <input id="exam-title" required placeholder="CURRENT AFFAIRS MOCK TEST 1">
+        </label>
+        <label>Duration (minutes)
+          <input id="exam-duration" type="number" min="1" value="30" required>
+        </label>
+        <label>Negative mark per wrong answer
+          <input id="exam-negative" type="number" min="0" step="0.01" value="0">
+        </label>
+        <label>Exam type
+          <select id="exam-paid">
+            <option value="false">Free</option>
+            <option value="true">Paid</option>
+          </select>
+        </label>
+        <label>Price (₹)
+          <input id="exam-price" type="number" min="1" step="1" value="29" disabled>
+        </label>
+        <label class="full">Description
+          <textarea id="exam-description" rows="2" placeholder="50 questions • PSC focused"></textarea>
+        </label>
         <button class="btn primary" type="submit">Create Exam</button>
         <div id="exam-status" class="status full"></div>
       </form>
       <div id="admin-exams" class="admin-list"></div>
     </div>
 
+    <!-- NORMAL EXAM QUESTIONS -->
     <div class="panel hidden" id="question-panel">
-      <div class="section-head"><div><h2 id="question-panel-title">Add Questions</h2><p class="muted">Add four options and choose the correct answer.</p></div></div>
+      <div class="section-head">
+        <div>
+          <h2 id="question-panel-title">Add Questions</h2>
+          <p class="muted">Add four options and choose the correct answer.</p>
+        </div>
+      </div>
       <form id="question-form" class="form-grid">
-        <label class="full">Question<textarea id="q-text" rows="3" required placeholder="Question text"></textarea></label>
+        <label class="full">Question
+          <textarea id="q-text" rows="3" required placeholder="Question text"></textarea>
+        </label>
         <label>Option A<input id="q-a" required></label>
         <label>Option B<input id="q-b" required></label>
         <label>Option C<input id="q-c" required></label>
         <label>Option D<input id="q-d" required></label>
-        <label>Correct option<select id="q-correct"><option>A</option><option>B</option><option>C</option><option>D</option></select></label>
-        <label>Marks<input id="q-marks" type="number" min="0" step="0.5" value="1"></label>
+        <label>Correct option
+          <select id="q-correct">
+            <option>A</option><option>B</option><option>C</option><option>D</option>
+          </select>
+        </label>
+        <label>Marks
+          <input id="q-marks" type="number" min="0" step="0.5" value="1">
+        </label>
         <button class="btn primary full" type="submit">Add Question</button>
         <div id="question-status" class="status full"></div>
       </form>
       <div id="admin-questions" class="admin-list"></div>
     </div>
 
+    <!-- LIVE EXAM MANAGEMENT -->
+    <div class="panel" id="live-exam-panel">
+      <div class="section-head">
+        <div>
+          <h2>Live Exam Management</h2>
+          <p class="muted">Create scheduled exams, add questions and manage results.</p>
+        </div>
+      </div>
+
+      <form id="live-exam-form" class="form-grid">
+        <label class="full">Live Exam Title
+          <input id="live-title" required placeholder="PSC LIVE EXAM 1">
+        </label>
+        <label class="full">Description
+          <textarea id="live-description" rows="2" placeholder="Exam instructions"></textarea>
+        </label>
+        <label>Start date and time
+          <input id="live-start" type="datetime-local" required>
+        </label>
+        <label>Duration (minutes)
+          <input id="live-duration" type="number" min="1" value="30" required>
+        </label>
+        <button class="btn primary full" type="submit">Create Live Exam</button>
+        <div id="live-exam-status" class="status full"></div>
+      </form>
+
+      <div class="divider"></div>
+      <h3>Existing Live Exams</h3>
+      <p class="muted">Created exams will appear here once the Live Exam script is connected.</p>
+      <div id="live-exam-list" class="admin-list"></div>
+
+      <div class="panel">
+        <h3>Add Live Exam Question</h3>
+        <form id="live-question-form" class="form-grid">
+          <label class="full">Exam ID
+            <input id="live-question-exam-id" required placeholder="Select or paste exam ID">
+          </label>
+          <label class="full">Question
+            <textarea id="live-q-text" rows="3" required placeholder="Enter question"></textarea>
+          </label>
+          <label>Option A<input id="live-q-a" required></label>
+          <label>Option B<input id="live-q-b" required></label>
+          <label>Option C<input id="live-q-c" required></label>
+          <label>Option D<input id="live-q-d" required></label>
+          <label>Correct option
+            <select id="live-q-correct">
+              <option value="0">A</option>
+              <option value="1">B</option>
+              <option value="2">C</option>
+              <option value="3">D</option>
+            </select>
+          </label>
+          <label>Marks
+            <input id="live-q-marks" type="number" min="1" value="1" required>
+          </label>
+          <button class="btn primary full" type="submit">Add Live Exam Question</button>
+          <div id="live-question-status" class="status full"></div>
+        </form>
+      </div>
+    </div>
+
+    <!-- DAILY CURRENT AFFAIRS -->
     <div class="panel">
-      <div class="section-head"><div><h2>Daily Current Affairs</h2><p class="muted">Publish short PSC-focused notes directly to the Current Affairs page.</p></div></div>
+      <div class="section-head">
+        <div>
+          <h2>Daily Current Affairs</h2>
+          <p class="muted">Publish short PSC-focused notes.</p>
+        </div>
+      </div>
       <form id="ca-form" class="form-grid">
-        <label>Category<select id="ca-category"><option>National</option><option>Kerala</option><option>International</option><option>Science & Tech</option><option>Sports</option><option>Appointments</option><option>Awards</option><option>Important Days</option></select></label>
-        <label>Date<input id="ca-date" type="date" required></label>
-        <label class="full">Headline<input id="ca-title" required placeholder="Short current-affairs headline"></label>
-        <label class="full">Short note<textarea id="ca-note" rows="3" required placeholder="Write 2–4 simple exam-oriented lines"></textarea></label>
-        <label class="full">Key points <span class="muted">(one per line)</span><textarea id="ca-points" rows="3" placeholder="Important fact&#10;Related organisation/person&#10;PSC takeaway"></textarea></label>
-        <label>Sort order<input id="ca-sort" type="number" value="1" min="1"></label>
+        <label>Category
+          <select id="ca-category">
+            <option>National</option>
+            <option>Kerala</option>
+            <option>International</option>
+            <option>Science &amp; Tech</option>
+            <option>Sports</option>
+            <option>Appointments</option>
+            <option>Awards</option>
+            <option>Important Days</option>
+          </select>
+        </label>
+        <label>Date
+          <input id="ca-date" type="date" required>
+        </label>
+        <label class="full">Headline
+          <input id="ca-title" required placeholder="Short current-affairs headline">
+        </label>
+        <label class="full">Short note
+          <textarea id="ca-note" rows="3" required placeholder="Write 2–4 simple exam-oriented lines"></textarea>
+        </label>
+        <label class="full">Key points (one per line)
+          <textarea id="ca-points" rows="3" placeholder="Important fact&#10;Related organisation/person&#10;PSC takeaway"></textarea>
+        </label>
+        <label>Sort order
+          <input id="ca-sort" type="number" value="1" min="1">
+        </label>
         <button class="btn primary" type="submit">Publish Current Affair</button>
         <button id="ca-cancel-edit" class="btn ghost hidden" type="button">Cancel Edit</button>
         <div id="ca-status-admin" class="status full"></div>
@@ -95,15 +253,21 @@
       <div id="admin-ca-list" class="admin-list"></div>
     </div>
 
+    <!-- PUBLISHED MATERIALS -->
     <div class="panel">
-      <div class="section-head"><div><h2>Published Materials</h2></div><button id="refresh" class="btn ghost">Refresh</button></div>
+      <div class="section-head">
+        <div><h2>Published Materials</h2></div>
+        <button id="refresh" class="btn ghost" type="button">Refresh</button>
+      </div>
       <div id="admin-products" class="admin-list"></div>
     </div>
+
   </section>
 </main>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="admin.js"></script>
-</body>
 <script src="ui.js"></script>
+</body>
 </html>
